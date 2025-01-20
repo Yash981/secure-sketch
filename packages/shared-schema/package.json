@@ -1,0 +1,19 @@
+{
+  "name": "@repo/shared-schema",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "exports":{
+    ".":"./src/index.ts"
+  },
+  "dependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "zod": "^3.24.1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
