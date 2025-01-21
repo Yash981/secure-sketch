@@ -1,5 +1,5 @@
 "use client"
-import { Circle, Square, Minus, Pencil, Eraser, Hand, MousePointer, HandIcon } from "lucide-react";
+import { Circle, Square, Minus, Pencil, Eraser, MousePointer, HandIcon } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
 
@@ -10,11 +10,11 @@ interface TopBarProps {
 export const TopBar = ({ className }: TopBarProps) => {
   return (
     <div className={cn(
-      "w-full ",
+      "w-[340px] h-[57px] bg-slate-500 border-spacing-2 rounded-md",
       className
     )}>
       <div className="container flex h-14 items-center justify-center">
-        <ToggleGroup type="single" defaultValue="select">
+        <ToggleGroup type="single" defaultValue="select" className="flex gap-2 px-2">
           <ToggleGroupItem value="select" aria-label="Select">
             <MousePointer className="h-5 w-5" />
           </ToggleGroupItem>

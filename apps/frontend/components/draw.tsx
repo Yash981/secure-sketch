@@ -93,7 +93,9 @@ const RoughCanvas = () => {
 
     return (
         <div className='w-screen h-screen overflow-hidden'>
-            <TopBar/>
+            <div className="flex justify-center mt-5">
+            <TopBar />
+            </div>
             <canvas
                 ref={canvasRef}
                 width={window.innerWidth}
