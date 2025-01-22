@@ -15,13 +15,14 @@
     "@radix-ui/react-tooltip": "^1.1.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "fabric": "^6.5.4",
     "lucide-react": "^0.473.0",
     "next": "15.1.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "roughjs": "^4.6.6",
     "tailwind-merge": "^2.6.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
