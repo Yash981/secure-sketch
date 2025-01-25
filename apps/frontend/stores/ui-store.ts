@@ -1,8 +1,9 @@
+import { Shape } from '@/draw/canvas';
 import { create} from 'zustand'
 
 interface UIstate {
-    selectedTool: string,
-    setSelectedTool:(selectedTool:string) => void
+    selectedTool: Shape,
+    setSelectedTool:(selectedTool:Shape) => void
 }
 
 export const useUIstore = create<UIstate>((set)=>({
