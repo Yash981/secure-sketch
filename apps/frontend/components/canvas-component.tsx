@@ -17,7 +17,11 @@ const CanvasComponent = () => {
     if (!canvasRef.current) return;
 
     // Create canvas and CanvasGame instance
-    const canvas = new Canvas(canvasRef.current);
+    const canvas = new Canvas(canvasRef.current,{
+      selection: false,
+      perPixelTargetFind: true,
+    });
+    
     const canvasGame = new CanvasGame(canvas, selectedTool,setSelectedTool);
     canvasGameRef.current = canvasGame;
 
@@ -25,19 +29,12 @@ const CanvasComponent = () => {
 
     canvasGame.loadCanvasState();
 
-    canvas.on("object:added", () => {
-      canvasGame.saveCanvasState();
-    });
-    canvas.on("object:removed", () => {
-      canvasGame.saveCanvasState();
-    });
-
     // Cleanup
     return () => {
       canvasGame.dispose()
+
     };
   }, [selectedTool]);
-
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Delete' && canvasGameRef.current) {
