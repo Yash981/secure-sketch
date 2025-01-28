@@ -3,17 +3,17 @@ import { Circle, Square, Minus, Pencil, Eraser, MousePointer, HandIcon } from "l
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
 import { useUIstore } from "@/stores";
-
+import { Button } from "./ui/button";
 interface TopBarProps {
   className?: string;
 }
 
 export const TopBar = ({ className }: TopBarProps) => {
-  const { setSelectedTool,selectedTool } = useUIstore()
+  const { setSelectedTool,selectedTool,setOpenDialog } = useUIstore()
 
   return (
     <div className={cn(
-      "w-[340px] h-[57px] bg-white border-spacing-2 rounded-lg",
+      "w-[420px] h-[57px] bg-white border-spacing-2 rounded-lg",
       className
     )}>
       <div className="container flex h-14 items-center justify-center shadow-lg rounded-lg border-2">
@@ -41,6 +41,7 @@ export const TopBar = ({ className }: TopBarProps) => {
             <Eraser className="h-5 w-5" />
           </ToggleGroupItem>
         </ToggleGroup>
+        <Button variant="destructive" onClick={()=>setOpenDialog(true)}><span className="text-xs">Clear</span></Button>
       </div>
     </div>
   );

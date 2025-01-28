@@ -5,7 +5,7 @@ import { useUIstore } from '@/stores';
 import { CanvasGame } from '@/draw/canvas';  // Adjust import path as needed
 
 const CanvasComponent = () => {
-  const { selectedTool ,setSelectedTool} = useUIstore();
+  const { selectedTool, setSelectedTool, isFilled, opacity, strokeWidth, color, clearCanvas, setClearCanvas } = useUIstore();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasGameRef = useRef<CanvasGame | null>(null);
   const [dimensions, setDimensions] = useState<{ width: number; height: number }>({
@@ -16,24 +16,28 @@ const CanvasComponent = () => {
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    // Create canvas and CanvasGame instance
-    const canvas = new Canvas(canvasRef.current,{
+    const canvas = new Canvas(canvasRef.current, {
       selection: false,
       perPixelTargetFind: true,
+      fireRightClick: true,
+      stopContextMenu: true,
     });
-    
-    const canvasGame = new CanvasGame(canvas, selectedTool,setSelectedTool);
+    const centerX = -dimensions.width / 4;
+    const centerY = -dimensions.height / 4;
+    canvas.setViewportTransform([1, 0, 0, 1, centerX, centerY]);
+
+    const canvasGame = new CanvasGame(canvas, selectedTool, setSelectedTool, isFilled, opacity, strokeWidth, color);
     canvasGameRef.current = canvasGame;
 
     canvasGame.render();
 
     canvasGame.loadCanvasState();
 
-    // Cleanup
     return () => {
       canvasGame.dispose()
 
     };
+    //eslint-disable-next-line
   }, [selectedTool]);
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -49,23 +53,50 @@ const CanvasComponent = () => {
   }, []);
   useEffect(() => {
     const handleResize = () => {
-      setDimensions({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
+      const newWidth = window.innerWidth * 2;
+      const newHeight = window.innerHeight * 2;
+      setDimensions({ width: newWidth, height: newHeight });
+
+      if (canvasGameRef.current) {
+        const canvas = canvasGameRef.current.canvas;
+        canvas.setDimensions({ width: newWidth, height: newHeight });
+        const centerX = -newWidth / 4;
+        const centerY = -newHeight / 4;
+        canvas.setViewportTransform([1, 0, 0, 1, centerX, centerY]);
+        canvas.requestRenderAll();
+      }
     };
+
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-
+  useEffect(() => {
+    if (clearCanvas && canvasGameRef.current) {
+      canvasGameRef.current.clearCanvas();
+      setClearCanvas(false);
+    }
+    //eslint-disable-next-line
+  }, [clearCanvas])
   return (
-    <canvas 
-      ref={canvasRef} 
-      width={dimensions.width} 
-      height={dimensions.height} 
-      style={{ border: "1px solid #000" }} 
-    />
+    <div style={{
+      width: '100vw',
+      height: '100vh',
+      overflow: 'hidden',
+      position: 'fixed',
+      top: 0,
+      left: 0
+    }}>
+      <canvas
+        ref={canvasRef}
+        width={dimensions.width}
+        height={dimensions.height}
+        style={{
+          position: 'absolute',
+          touchAction: 'none'  // Important for mobile panning
+        }}
+      />
+    </div>
   );
 };
 
