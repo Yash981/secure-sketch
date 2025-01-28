@@ -8,6 +8,6 @@ export const UserAuthFormSchema = z.object({
   .regex(/[0-9]/, { message: "Password must contain at least one number" })
   .regex(/[@$!%*?&]/, { message: "Password must contain at least one special character (@, $, !, %, *, ?, &)" }),
   name:z.string().optional()
-});
+}).strict();
 
 export type UserAuthFormSchema = z.infer<typeof UserAuthFormSchema>;
