@@ -13,7 +13,7 @@ const PRESET_COLORS = [
   '#000000', '#1971c2', '#868e96',
   '#e03131', '#c2255c', '#9c36b5',  
   '#3b5bdb', '#0c8599', 
-  '#2f9e44',  '#f08c00', 
+  '#2f9e44',  '#f08c00'
 ];
 
 export const DrawingControls = () => {
@@ -28,20 +28,20 @@ export const DrawingControls = () => {
           <PopoverTrigger>
             <div
               className="w-9 h-9 rounded-lg border-2 border-gray-200 shadow-sm cursor-pointer hover:scale-105 transition-all duration-200"
-              style={{ backgroundColor: color }}
+              style={{ background: color }}
             />
           </PopoverTrigger>
           <PopoverContent className="w-64 p-3 ml-5 border border-gray-100 rounded-xl shadow-lg bg-white">
             <div className="grid grid-cols-4 gap-2">
-              {PRESET_COLORS.map((presetColor) => (
+              {PRESET_COLORS.map((presetColor, index) => (
                 <button
-                  key={presetColor}
+                  key={index}
                   className={cn(
                     "w-8 h-8 rounded-lg border-2 border-gray-100 shadow-sm transition-all duration-200 hover:scale-110",
                     color === presetColor ? "ring-2 ring-offset-2 ring-blue-500" : "ring-offset-0"
                   )}
-                  style={{ backgroundColor: presetColor }}
-                  onClick={() => { setColor(presetColor); setSelectedTool('select') }}
+                  style={{ background: presetColor }}
+                  onClick={() => { setColor(presetColor); setSelectedTool('select'); }}
                 />
               ))}
             </div>
@@ -54,7 +54,7 @@ export const DrawingControls = () => {
         <Label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Stroke Width</Label>
         <Slider
           value={[strokeWidth]}
-          onValueChange={(value) => { setStrokeWidth(value[0]); setSelectedTool('select') }}
+          onValueChange={(value) => { setStrokeWidth(value[0]); setSelectedTool('select'); }}
           min={1}
           max={20}
           step={1}
@@ -68,7 +68,7 @@ export const DrawingControls = () => {
         <Label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Opacity</Label>
         <Slider
           value={[opacity]}
-          onValueChange={(value) => { setOpacity(value[0]); setSelectedTool('select') }}
+          onValueChange={(value) => { setOpacity(value[0]); setSelectedTool('select'); }}
           min={0.1}
           max={1}
           step={0.1}
@@ -87,7 +87,7 @@ export const DrawingControls = () => {
               ? "bg-blue-600 text-white hover:bg-blue-700"
               : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
           )}
-          onClick={() => { setIsFilled(!isFilled); setSelectedTool('select') }}
+          onClick={() => { setIsFilled(!isFilled); setSelectedTool('select'); }}
         >
           {isFilled ? 'Filled' : 'Stroke'}
         </button>

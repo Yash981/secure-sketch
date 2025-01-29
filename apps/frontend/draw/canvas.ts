@@ -223,7 +223,7 @@ export class CanvasGame {
   };
   render() {
     if (this.selectedTool === "rectangle") {
-      this.canvas.defaultCursor = "crosshair";
+      this.canvas.defaultCursor = "crosshair";    
       this.handleDrawRectangle();
     }
     if (this.selectedTool === "circle") {

@@ -12,9 +12,9 @@ import {
 import { useUIstore } from "@/stores"
   
   export function ClearDialog() {
-    const {openDialog,setOpenDialog,setClearCanvas} = useUIstore()
+    const {dialogState,setDialogState,setClearCanvas} = useUIstore()
     return (
-      <AlertDialog open={openDialog} onOpenChange={()=>setOpenDialog(!openDialog)}>
+      <AlertDialog open={dialogState.clear} onOpenChange={()=>setDialogState("clear",!dialogState.clear)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>

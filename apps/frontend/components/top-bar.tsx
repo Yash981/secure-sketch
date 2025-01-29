@@ -9,7 +9,7 @@ interface TopBarProps {
 }
 
 export const TopBar = ({ className }: TopBarProps) => {
-  const { setSelectedTool,selectedTool,setOpenDialog } = useUIstore()
+  const { setSelectedTool,selectedTool,setDialogState } = useUIstore()
 
   return (
     <div className={cn(
@@ -41,7 +41,7 @@ export const TopBar = ({ className }: TopBarProps) => {
             <Eraser className="h-5 w-5" />
           </ToggleGroupItem>
         </ToggleGroup>
-        <Button variant="destructive" onClick={()=>setOpenDialog(true)}><span className="text-xs">Clear</span></Button>
+        <Button variant="destructive" onClick={()=>setDialogState("clear",true)}><span className="text-xs">Clear</span></Button>
       </div>
     </div>
   );
