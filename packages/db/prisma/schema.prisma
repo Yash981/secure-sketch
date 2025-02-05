@@ -53,7 +53,6 @@ model SharedLink {
   id            String    @id @default(cuid())
   drawingId     String
   drawing       Drawing   @relation(fields: [drawingId], references: [id])
-  encryptionKey String // Key for decrypting the drawing (stored securely)
   createdAt     DateTime  @default(now())
   expiresAt     DateTime? // Optional expiration date for the link
   User          User?     @relation(fields: [userId], references: [id])

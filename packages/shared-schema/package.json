@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "@repo/typescript-config": "workspace:*",
-    "zod": "^3.24.1"
+    "zod": "^3.24.1",
+    "@repo/db": "workspace:*",
+    "@prisma/client": "^5.10.2"
   },
   "keywords": [],
   "author": "",
