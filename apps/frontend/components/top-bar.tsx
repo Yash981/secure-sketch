@@ -1,5 +1,5 @@
 "use client"
-import { Circle, Square, Minus, Pencil, Eraser, MousePointer, HandIcon } from "lucide-react";
+import { Circle, Square, Minus, Pencil, Eraser, MousePointer, HandIcon, Type } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
 import { useUIstore } from "@/stores";
@@ -13,7 +13,7 @@ export const TopBar = ({ className }: TopBarProps) => {
 
   return (
     <div className={cn(
-      "w-[420px] h-[57px] bg-white border-spacing-2 rounded-lg",
+      "w-[460px] h-[57px] bg-white border-spacing-2 rounded-lg",
       className
     )}>
       <div className="container flex h-14 items-center justify-center shadow-lg rounded-lg border-2">
@@ -39,6 +39,9 @@ export const TopBar = ({ className }: TopBarProps) => {
           </ToggleGroupItem>
           <ToggleGroupItem value="eraser" aria-label="Eraser">
             <Eraser className="h-5 w-5" />
+          </ToggleGroupItem>
+          <ToggleGroupItem value="text" aria-label="Text">
+            <Type className="h-5 w-5" />
           </ToggleGroupItem>
         </ToggleGroup>
         <Button variant="destructive" onClick={()=>setDialogState("clear",true)}><span className="text-xs">Clear</span></Button>

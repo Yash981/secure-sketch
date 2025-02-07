@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
+import { configDotenv } from 'dotenv';
 import jwt from 'jsonwebtoken';
-
+configDotenv({path:'../../.env'})
 const JWT_SECRET = process.env.JWT_SECRET || 'Yashwanth14';
 const JWT_EXPIRATION = '7d';
 

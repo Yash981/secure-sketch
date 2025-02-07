@@ -1,5 +1,5 @@
 "use client";
-import { Rect, Canvas, Circle, Line, PencilBrush } from "fabric";
+import { Rect, Canvas, Circle, Line, PencilBrush, IText } from "fabric";
 export type Shape =
   | "circle"
   | "rectangle"
@@ -7,6 +7,7 @@ export type Shape =
   | "pencil"
   | "eraser"
   | "select"
+  | "text"
   | "pan";
 export class CanvasGame {
   canvas: Canvas;
@@ -210,20 +211,95 @@ export class CanvasGame {
     });
   };
   handleDrawEraser = () => {
-    this.cleanupEventListeners();
-    const eraser = new PencilBrush(this.canvas);
-    this.canvas.freeDrawingBrush = eraser;
-    this.canvas.freeDrawingBrush.color = "white";
-    this.canvas.freeDrawingBrush.width = this.strokeWidth;
-    this.canvas.isDrawingMode = true;
+    this.canvas.isDrawingMode = false;
+    this.canvas.selection = false;
+
+    const cursorSize = 5;
+    const cursorDot = document.createElement("div");
+    cursorDot.style.width = `${cursorSize}px`;
+    cursorDot.style.height = `${cursorSize}px`;
+    cursorDot.style.backgroundColor = "red";
+    cursorDot.style.borderRadius = "50%";
+    cursorDot.style.pointerEvents = "none";
+    cursorDot.style.zIndex = "1000";
+    const canvasContainer = this.canvas.getElement().parentNode;
+    if (canvasContainer) canvasContainer.appendChild(cursorDot);
+
+    let isErasing = false;
+
+    const eraseObjects = (event: any) => {
+      if (!isErasing) return;
+
+      const pointer = this.canvas.getScenePoint(event.e);
+      if (!pointer) return;
+
+      cursorDot.style.left = `${event.e.clientX - cursorSize / 2}px`;
+      cursorDot.style.top = `${event.e.clientY - cursorSize / 2}px`;
+
+      const objectsToRemove = this.canvas
+        .getObjects()
+        .filter((obj) => obj.containsPoint(pointer));
+
+      objectsToRemove.forEach((obj) => this.canvas.remove(obj));
+      this.canvas.requestRenderAll();
+    };
+
+    const mouseDownHandler = () => {
+      isErasing = true;
+    };
+
+    const mouseUpHandler = () => {
+      isErasing = false;
+    };
+
+    this.canvas.on("mouse:move", eraseObjects);
+    this.canvas.on("mouse:down", mouseDownHandler);
+    this.canvas.on("mouse:up", mouseUpHandler);
+
     this.canvas.on("mouse:up", () => {
-      this.saveCanvasState();
       this.setSelectedTool("select");
+      if (canvasContainer && canvasContainer.contains(cursorDot)) {
+        canvasContainer.removeChild(cursorDot);
+      }
+      this.canvas.off("mouse:move", eraseObjects);
+      this.canvas.off("mouse:down", mouseDownHandler);
+      this.canvas.off("mouse:up", mouseUpHandler);
     });
+  };
+
+  handleDrawText = () => {
+    this.canvas.defaultCursor = "crosshair";
+    this.cleanupEventListeners();
+
+    const textMouseDownHandler = (event: any) => {
+      if (this.selectedTool !== "text") return;
+      const pointer = this.canvas.getPointer(event.e);
+      const text = new IText("", {
+        left: pointer.x,
+        top: pointer.y,
+        fontSize: 20,
+        fontFamily: "Arial",
+        fill: "#000",
+        editable: true,
+      });
+
+      this.canvas.add(text);
+      this.canvas.setActiveObject(text);
+      text.enterEditing();
+      this.canvas.defaultCursor = "text";
+
+      text.on("editing:exited", () => {
+        this.canvas.defaultCursor = "default";
+        this.setSelectedTool("select");
+      });
+      this.canvas.off("mouse:down", textMouseDownHandler);
+    };
+
+    this.canvas.on("mouse:down", textMouseDownHandler);
   };
   render() {
     if (this.selectedTool === "rectangle") {
-      this.canvas.defaultCursor = "crosshair";    
+      this.canvas.defaultCursor = "crosshair";
       this.handleDrawRectangle();
     }
     if (this.selectedTool === "circle") {
@@ -249,6 +325,10 @@ export class CanvasGame {
       this.canvas.defaultCursor = "grab";
       this.canvas.selection = false;
     }
+    if (this.selectedTool === "text") {
+      this.handleDrawText();
+    }
+
     this.loadCanvasState();
   }
 
