@@ -1,5 +1,6 @@
 import { Shape } from "@/draw/canvas";
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 /**
  * Represents the state of the UI in the application.
@@ -74,14 +75,14 @@ interface UIstate {
   /**
    * The state of various dialogs in the application.
    */
-  dialogState: { [key in 'collaboration' | 'clear' ]: boolean } ;
+  dialogState: { [key in "collaboration" | "clear"]: boolean };
 
   /**
    * Sets the state of a specific dialog.
    * @param key - The key identifying the dialog.
    * @param value - The state to be set for the dialog.
    */
-  setDialogState: (key: 'collaboration' | 'clear', value: boolean) => void;
+  setDialogState: (key: "collaboration" | "clear", value: boolean) => void;
 
   /**
    * Indicates whether the canvas should be cleared.
@@ -121,17 +122,45 @@ export const useUIstore = create<UIstate>((set) => ({
   setColor: (color) => {
     set({ color });
   },
-  dialogState: {collaboration:false,clear:false} ,
-  setDialogState: (key:string,value:boolean) => {
+  dialogState: { collaboration: false, clear: false },
+  setDialogState: (key: string, value: boolean) => {
     set((state) => ({
       dialogState: {
         ...state.dialogState,
-        [key]: value, 
+        [key]: value,
       },
-    }))
+    }));
   },
   clearCanvas: false,
   setClearCanvas: (clearCanvas) => {
     set({ clearCanvas });
   },
 }));
+
+type ZoomState = {
+  /**
+   * Indicates the current zoom level as a percentage.
+   * A value of 100 means 100% (normal size), 
+   * while values below 100% zoom out and values above 100% zoom in.
+   */
+  zoom: number;
+
+  /**
+   * Updates the zoom level to a specified percentage.
+   * The zoom value is clamped between 10% and 500%.
+   * @param zoom - The desired zoom level as a percentage.
+   */
+  setZoom: (zoom: number) => void;
+};
+export const useZoomStore = create<ZoomState>()(
+  persist(
+    (set) => ({
+      zoom: 100,
+      setZoom: (zoom: number) =>
+        set(() => ({
+          zoom: Math.min(Math.max(zoom, 10), 500),
+        })),
+    }),
+    { name: "zoom-storage" }
+  )
+);

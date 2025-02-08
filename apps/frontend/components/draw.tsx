@@ -4,8 +4,8 @@ import CanvasComponent from "./canvas-component";
 import { ClearDialog } from "./clear-dialog";
 import Collaboration from "./collaboration";
 import DrawingSelection from "./drawing-selections";
-// import { useUIstore } from "@/stores";
 import { TopBar } from "./top-bar";
+import ZoomCanvas from "./zoom-canvas";
 const Draw = () => {
     return (
       <div className='relative w-screen h-screen'>
@@ -16,6 +16,7 @@ const Draw = () => {
         <ClearDialog/>
         <CanvasComponent/>
         <DrawingSelection/>
+        <ZoomCanvas/>
       </div>
     );
   };

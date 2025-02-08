@@ -367,9 +367,22 @@ export class CanvasGame {
       this.canvas.renderAll();
     }
   }
-  zoomCanvas(factor: number) {
-    this.canvas.setZoom(this.canvas.getZoom() * factor);
-  }
+  zoomCanvas(zoomLevel: number) {
+    const zoom = Math.min(Math.max(zoomLevel/100, 0.5), 5);
+    const zoomPoint = this.canvas.getCenterPoint(); 
+    this.canvas.zoomToPoint(zoomPoint, zoom);
+    const newTransform = this.canvas.viewportTransform
+    if(newTransform){
+      newTransform[0] = zoom
+      newTransform[3] = zoom
+      this.canvas.setViewportTransform(newTransform);
+    } 
+    
+    this.canvas.renderAll();
+    setTimeout(() => {
+      this.saveCanvasState();
+    }, 500);
+}
   dispose() {
     this.canvas.dispose();
   }

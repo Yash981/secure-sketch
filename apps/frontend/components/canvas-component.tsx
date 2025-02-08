@@ -1,11 +1,12 @@
 "use client";
 import { Canvas } from 'fabric';
 import React, { useEffect, useRef, useState } from 'react';
-import { useUIstore } from '@/stores';
+import { useUIstore, useZoomStore } from '@/stores';
 import { CanvasGame } from '@/draw/canvas';  // Adjust import path as needed
 
 const CanvasComponent = () => {
   const { selectedTool, setSelectedTool, isFilled, opacity, strokeWidth, color, clearCanvas, setClearCanvas } = useUIstore();
+  const {zoom} = useZoomStore()
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasGameRef = useRef<CanvasGame | null>(null);
   const [dimensions, setDimensions] = useState<{ width: number; height: number }>({
@@ -15,26 +16,27 @@ const CanvasComponent = () => {
 
   useEffect(() => {
     if (!canvasRef.current) return;
+      const canvas = new Canvas(canvasRef.current, {
+        selection: false,
+        perPixelTargetFind: true,
+        fireRightClick: true,
+        stopContextMenu: true,
+      });
+      const centerX = -dimensions.width / 4;
+      const centerY = -dimensions.height / 4;
+      canvas.setViewportTransform([1, 0, 0, 1, centerX, centerY]);
 
-    const canvas = new Canvas(canvasRef.current, {
-      selection: false,
-      perPixelTargetFind: true,
-      fireRightClick: true,
-      stopContextMenu: true,
-    });
-    const centerX = -dimensions.width / 4;
-    const centerY = -dimensions.height / 4;
-    canvas.setViewportTransform([1, 0, 0, 1, centerX, centerY]);
+      const canvasGame = new CanvasGame(canvas, selectedTool, setSelectedTool, isFilled, opacity, strokeWidth, color);
+      canvasGameRef.current = canvasGame;
 
-    const canvasGame = new CanvasGame(canvas, selectedTool, setSelectedTool, isFilled, opacity, strokeWidth, color);
-    canvasGameRef.current = canvasGame;
+      canvasGame.render();
 
-    canvasGame.render();
+      canvasGame.loadCanvasState();
 
-    canvasGame.loadCanvasState();
+
 
     return () => {
-      canvasGame.dispose()
+      canvasGame?.dispose()
 
     };
     //eslint-disable-next-line
@@ -78,6 +80,9 @@ const CanvasComponent = () => {
     }
     //eslint-disable-next-line
   }, [clearCanvas])
+  useEffect(() => {
+    if (canvasGameRef.current) canvasGameRef.current?.zoomCanvas(zoom)
+  }, [zoom])
   return (
     <div style={{
       width: '100vw',

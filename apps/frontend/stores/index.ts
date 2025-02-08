@@ -1,1 +1,1 @@
-export {useUIstore} from './ui-store'
+export {useUIstore,useZoomStore} from './ui-store'
