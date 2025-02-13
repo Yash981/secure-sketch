@@ -2,10 +2,10 @@
 import { Canvas } from 'fabric';
 import React, { useEffect, useRef, useState } from 'react';
 import { useUIstore, useZoomStore } from '@/stores';
-import { CanvasGame } from '@/draw/canvas';  // Adjust import path as needed
+import { CanvasGame } from '@/draw/canvas-class';  // Adjust import path as needed
 
 const CanvasComponent = () => {
-  const { selectedTool, setSelectedTool, isFilled, opacity, strokeWidth, color, clearCanvas, setClearCanvas } = useUIstore();
+  const { selectedTool, setSelectedTool, isFilled, opacity, strokeWidth, color, clearCanvas, setClearCanvas,dialogState,setCanvasData} = useUIstore();
   const {zoom} = useZoomStore()
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasGameRef = useRef<CanvasGame | null>(null);
@@ -83,6 +83,22 @@ const CanvasComponent = () => {
   useEffect(() => {
     if (canvasGameRef.current) canvasGameRef.current?.zoomCanvas(zoom)
   }, [zoom])
+useEffect(()=>{
+  if(dialogState.collaboration && canvasGameRef.current){
+    setCanvasData(canvasGameRef.current?.getCurrentCanvasState())
+  }
+  //eslint-disable-next-line
+},[dialogState.collaboration])
+  // useEffect(()=>{
+  //   if(undo && canvasGameRef.current) {
+  //     canvasGameRef.current?.undo()
+  //   }
+  // },[undo])
+  // useEffect(()=>{
+  //   if(redo && canvasGameRef.current){
+  //     canvasGameRef.current?.redo()
+  //   }
+  // },[redo])
   return (
     <div style={{
       width: '100vw',
@@ -98,7 +114,7 @@ const CanvasComponent = () => {
         height={dimensions.height}
         style={{
           position: 'absolute',
-          touchAction: 'none'  // Important for mobile panning
+          touchAction: 'none' 
         }}
       />
     </div>

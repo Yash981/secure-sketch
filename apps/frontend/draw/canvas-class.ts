@@ -22,6 +22,11 @@ export class CanvasGame {
   private lastPanY: number;
   private viewportTransform: number[] | null;
   private eraser: number;
+  // private undoStack: any[];
+  // private redoStack: any[];
+  // private currentState: any;
+  // private isUndoingRedoing: boolean = false;
+
   constructor(
     canvas: Canvas,
     selectedTool: Shape,
@@ -44,6 +49,12 @@ export class CanvasGame {
     this.viewportTransform = null;
     this.eraser = 10;
     this.initializeCanvasEvents();
+    // this.undoStack = [];
+    // this.redoStack = [];
+    // this.currentState = this.canvas.toJSON();
+    // this.saveState();
+    // this.isUndoingRedoing = false
+    
   }
   private initializeCanvasEvents() {
     this.canvas.on("object:modified", this.handleObjectModified.bind(this));
@@ -63,7 +74,6 @@ export class CanvasGame {
     this.saveCanvasState();
     this.canvas.renderAll();
   };
-  //panning
 
   handleDrawRectangle = () => {
     this.cleanupEventListeners();
@@ -342,6 +352,9 @@ export class CanvasGame {
       })
     );
   }
+  getCurrentCanvasState(){
+    return JSON.stringify({canvas:this.canvas.toJSON(),viewportTransform:this.canvas.viewportTransform})
+  }
   loadCanvasState() {
     const savedState = localStorage.getItem("canvas");
     if (savedState) {
@@ -368,21 +381,21 @@ export class CanvasGame {
     }
   }
   zoomCanvas(zoomLevel: number) {
-    const zoom = Math.min(Math.max(zoomLevel/100, 0.5), 5);
-    const zoomPoint = this.canvas.getCenterPoint(); 
+    const zoom = Math.min(Math.max(zoomLevel / 100, 0.5), 5);
+    const zoomPoint = this.canvas.getCenterPoint();
     this.canvas.zoomToPoint(zoomPoint, zoom);
-    const newTransform = this.canvas.viewportTransform
-    if(newTransform){
-      newTransform[0] = zoom
-      newTransform[3] = zoom
+    const newTransform = this.canvas.viewportTransform;
+    if (newTransform) {
+      newTransform[0] = zoom;
+      newTransform[3] = zoom;
       this.canvas.setViewportTransform(newTransform);
-    } 
-    
+    }
+
     this.canvas.renderAll();
     setTimeout(() => {
       this.saveCanvasState();
     }, 500);
-}
+  }
   dispose() {
     this.canvas.dispose();
   }
@@ -402,36 +415,126 @@ export class CanvasGame {
   }
   private handlePanStart = (event: any) => {
     if (this.selectedTool !== "pan") return;
+    
+    const target = event.target;
+    if (target && target.selectable) return;
+
     this.isPanning = true;
     this.canvas.defaultCursor = "grabbing";
+
     const pointer = this.canvas.getPointer(event.e);
     this.lastPanX = pointer.x;
     this.lastPanY = pointer.y;
-  };
 
-  private handlePanMove = (event: any) => {
+    this.canvas.selection = false;
+    this.canvas.forEachObject((obj) => obj.set({ selectable: false, evented: false }));
+};
+
+private handlePanMove = (event: any) => {
     if (!this.isPanning) return;
+
     const pointer = this.canvas.getPointer(event.e);
     const deltaX = pointer.x - this.lastPanX;
     const deltaY = pointer.y - this.lastPanY;
 
     const vpt = this.canvas.viewportTransform;
-    if (vpt) {
-      vpt[4] += deltaX;
-      vpt[5] += deltaY;
-      this.canvas.setViewportTransform(vpt);
-      this.canvas.requestRenderAll();
-    }
+    if (!vpt) return;
+
+    vpt[4] += deltaX;
+    vpt[5] += deltaY;
+
+    this.canvas.setViewportTransform(vpt);
+    this.canvas.requestRenderAll();
 
     this.lastPanX = pointer.x;
     this.lastPanY = pointer.y;
-  };
+};
 
-  private handlePanEnd = () => {
+private handlePanEnd = () => {
     this.isPanning = false;
-    this.viewportTransform = this.canvas.viewportTransform;
     this.canvas.defaultCursor = "grab";
 
+    this.canvas.selection = true;
+    this.canvas.forEachObject((obj) => obj.set({ selectable: true, evented: true }));
+
     this.saveCanvasState();
-  };
+};
+
+
+  // private saveState() {
+  //   this.canvas.on("object:added", this.performAction.bind(this));
+  //   this.canvas.on("object:modified", this.performAction.bind(this));
+  //   this.canvas.on("object:removed", this.performAction.bind(this));
+  // }
+  // performAction() {
+  //   const newState = this.canvas.toJSON();
+  //   // console.log(typeof newState,typeof this.currentState,'typeof')
+  //   if (!this.deepEqual(newState, this.currentState)) {
+  //     if (this.currentState) {
+  //       this.undoStack.push({ ...this.currentState }); 
+  //     }
+  //     this.currentState = newState;
+  //     this.redoStack = [];
+  //   }
+  //   // console.log("🟢 Action Performed");
+  //   // console.log("Current State:", this.currentState);
+  //   // console.log("Undo Stack:", this.undoStack);
+  //   // console.log("Redo Stack:", this.redoStack);
+  // }
+  // undo() {
+  //   if (this.undoStack.length === 0) {
+  //     // console.warn("❌ Undo stack is empty!");
+  //     return;
+  //   }
+
+  //   this.redoStack.push({ ...this.currentState }); // ✅ Clone properly
+  //   this.currentState = this.undoStack.pop();
+
+  //   this.canvas.clear(); // ✅ Ensure a clean reset
+  //   this.canvas.loadFromJSON(this.currentState, () => {
+  //     this.canvas.renderAll();
+  //   });
+
+  //   // console.log("🔄 Undo Performed");
+  //   // console.log("Current State:", this.currentState);
+  //   // console.log("Undo Stack:", this.undoStack);
+  //   // console.log("Redo Stack:", this.redoStack);
+  // }
+  // redo() {
+  //   if (this.redoStack.length === 0) {
+  //     // console.warn("❌ Redo stack is empty!");
+  //     return;
+  //   }
+
+  //   this.undoStack.push({ ...this.currentState }); // ✅ Clone properly
+  //   this.currentState = this.redoStack.pop();
+
+  //   this.canvas.clear(); // ✅ Ensure a clean reset
+  //   this.canvas.loadFromJSON(this.currentState, () => {
+  //     this.canvas.renderAll();
+  //   });
+
+  //   // console.log("🔁 Redo Performed");
+  //   // console.log("Current State:", this.currentState);
+  //   // console.log("Undo Stack:", this.undoStack);
+  //   // console.log("Redo Stack:", this.redoStack);
+  // }
+  // private deepEqual(obj1: any, obj2: any): boolean {
+  //   if (obj1 === obj2) return true; // Same reference
+  
+  //   if (typeof obj1 !== "object" || typeof obj2 !== "object" || obj1 === null || obj2 === null) {
+  //     return obj1 === obj2; // Primitive values
+  //   }
+  
+  //   const keys1 = Object.keys(obj1);
+  //   const keys2 = Object.keys(obj2);
+  
+  //   if (keys1.length !== keys2.length) return false; // Different number of keys
+  
+  //   for (const key of keys1) {
+  //     if (!this.deepEqual(obj1[key], obj2[key])) return false; 
+  //   }
+  
+  //   return true;
+  // }
 }

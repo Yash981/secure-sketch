@@ -29,11 +29,10 @@ model Drawing {
   id            String         @id @default(cuid())
   title         String
   description   String?
-  encryptedData Bytes // Encrypted drawing data (AES-GCM encrypted blob)
-  iv            Bytes // Initialization vector for decryption
+  encryptedData Bytes 
   ownerId       String
   owner         User           @relation(fields: [ownerId], references: [id])
-  collaborators Collaborator[] // Relation for collaborative editing
+  collaborators Collaborator[] 
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   SharedLink    SharedLink[]

@@ -82,22 +82,42 @@ export async function ExtractKeyFromURL():Promise<CryptoKey | null> {
     
 }
 
-export async function testExample() {
-    const key = await generateKey();
-    const message = "Hey, this is a secret msg!";
-    const encryptedData = await encryptMessage(key, message);
+// export async function testExample() {
+//     const key = await generateKey();
+//     const message = "Hey, this is a secret msg!";
+//     const encryptedData = await encryptMessage(key, message);
     
 
-    const shareableURL = await generateShareableURL(key, encryptedData);
-    const urlObj = new URL(shareableURL)
-    window.location.hash = urlObj.hash; 
-    const extractedKey = await ExtractKeyFromURL();
-    if (!extractedKey) {
-        console.error("Invalid or missing key in URL!");
-        return;
-    }
-    const downloadedData = await downloadEncryptedContent(urlObj.search.slice(4));
+//     const shareableURL = await generateShareableURL(key, encryptedData);
+//     const urlObj = new URL(shareableURL)
+//     window.location.hash = urlObj.hash; 
+//     const extractedKey = await ExtractKeyFromURL();
+//     if (!extractedKey) {
+//         console.error("Invalid or missing key in URL!");
+//         return;
+//     }
+//     const downloadedData = await downloadEncryptedContent(urlObj.search.slice(4));
 
-    const decryptedMessage = await decryptMessage(extractedKey, downloadedData);
-    console.log("Decrypted Message:", decryptedMessage);
+//     const decryptedMessage = await decryptMessage(extractedKey, downloadedData);
+//     console.log("Decrypted Message:", decryptedMessage);
+// }
+
+export const uploadEncryptedDataToServer = async (data:string) =>{
+  const key = await generateKey();
+  const encryptedData = await encryptMessage(key,data)
+  const shareableURL = await generateShareableURL(key,encryptedData);
+  return shareableURL
+
+}
+export const downloadEncryptedDataOnClient = async (url:string) =>{
+  const urlObj = new URL(url)
+  const extractedKey = await ExtractKeyFromURL();
+  if(!extractedKey){
+    console.error('Invalid or missing key in URL!');
+    return;
+  }
+  const downloadData = await downloadEncryptedContent(urlObj.search.slice(4))
+  const decryptedMessage = await decryptMessage(extractedKey,downloadData);
+  console.log(decryptMessage,'decryptmessage')
+  return decryptedMessage
 }

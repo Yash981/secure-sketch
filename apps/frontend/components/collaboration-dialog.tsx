@@ -10,13 +10,37 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useUIstore } from "@/stores"
-import { Circle, Copy, Play } from "lucide-react"
+import { uploadEncryptedDataToServer } from "@/lib/E2EE"
+import { Check, Circle, Copy, Loader2, Play } from "lucide-react"
 import { useState } from "react"
 
 export function CollaborationDialog() {
-    const { dialogState, setDialogState } = useUIstore()
+    const { dialogState, setDialogState,canvasData } = useUIstore()
     const [startSession, setStartSession] = useState(false)
     const [inputValue,setInputValue] = useState('Yashwanth')
+    const [currentUrl,setCurrentUrl] = useState('')
+    const [loading,setLoading] = useState(false)
+    const [,setError] = useState('')
+    const [copied,setCopied] = useState(false)
+    const handleStartSession = async () =>{
+        if(!canvasData) return;
+        try {
+            setLoading(true)
+            const url = await uploadEncryptedDataToServer(canvasData)
+            console.log(url,'uploaded data and url')
+            if(url){
+                setCurrentUrl(url)
+                setStartSession(true)
+            }
+        } catch (error:any) {
+            console.log(error,'error upload encryted data')
+            setError(error)
+        }finally{
+            setLoading(false)
+        }
+        
+
+    }
     return (
         <Dialog open={dialogState.collaboration} onOpenChange={() => setDialogState("collaboration", !dialogState.collaboration)}>
             <DialogContent className="sm:max-w-[625px]">
@@ -42,18 +66,26 @@ export function CollaborationDialog() {
                                 <Label htmlFor="name" className="text-right">
                                     Your Link
                                 </Label>
-                                <Input id="name" value="https://excalidraw.com/#room=8531bcf8fc30f26cd9b2,sGSg4Ciw4VzXC-YqV3gFqw" className="w-full" readOnly />
+                                <Input id="name" value={currentUrl} className="w-full" readOnly />
                             </div>
-                            <Button variant={"secondary"}>
-                                <Copy />
+                            <Button
+                                variant={"secondary"}
+                                onClick={() => {
+                                    navigator.clipboard.writeText(currentUrl)
+                                    setCopied(true)
+                                    setTimeout(() => setCopied(false), 2000)
+                                }}
+                            >
+                                {copied ? <Check /> : <Copy />}
                             </Button>
                         </div>
                     </div>
                 )}
                 <DialogFooter className="sm:justify-center">
                     {!startSession ? (
-                        <Button type="button" onClick={() => setStartSession(true)}>
-                            <Play /> Start Session
+                        <Button type="button" onClick={handleStartSession}>
+                            {loading ? <Loader2 className="animate-spin" /> : <Play />}
+                            {loading ? 'Starting Session' : 'Start Session'}
                         </Button>
                     ) : (
                         <Button type="button" variant={"outline"} onClick={() => setStartSession(false)}>

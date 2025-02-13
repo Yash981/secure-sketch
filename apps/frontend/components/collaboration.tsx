@@ -3,11 +3,21 @@ import { Button } from "./ui/button";
 import { CollaborationDialog } from "./collaboration-dialog";
 
 const Collaboration = () => {
-    const {setDialogState} = useUIstore()
+    const { setDialogState } = useUIstore();
+
+    const handleStartCollaboration = async () => {
+        setDialogState("collaboration", true);
+
+    };
     return ( 
         <div className="flex justify-end absolute right-4 top-4">
-        <Button variant={"default"} onClick={()=>setDialogState("collaboration",true)}>Start Live Collaboration</Button>
-        <CollaborationDialog/>
+            <Button 
+                variant={"default"} 
+                onClick={handleStartCollaboration}
+            >
+                Start Live Collaboration
+            </Button>
+            <CollaborationDialog  />
         </div>
      );
 }
