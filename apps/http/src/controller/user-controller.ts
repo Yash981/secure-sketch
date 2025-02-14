@@ -81,7 +81,7 @@ export const UploadEncryptedData = async(req:Request,res:Response) =>{
   const fileId = crypto.randomUUID()
   storage[fileId] = req.body
   console.log(storage,'storage')
-  res.json({ url: `http://localhost:${9000}/download?id=${fileId}` });
+  res.json({ url: `http://localhost:${3000}/download?id=${fileId}` });
 }
 export const downloadEncryptedContent = async(req:Request,res:Response) =>{
     const { id } = req.query;

@@ -38,9 +38,9 @@ export const AuthForm = () => {
                 }
                 console.log(response)
                 if(response && response.data.token){
-                    localStorage.setItem('wsToken',response.data.token)
+                    localStorage.setItem('excaliWsToken',response.data.token)
                 }
-                router.push("/lobby")
+                router.push("/")
             } catch (error) {
                 setError((error as Error).message)
             } finally {

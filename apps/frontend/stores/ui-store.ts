@@ -1,4 +1,4 @@
-import { Shape } from "@/draw/canvas";
+import { Shape } from "@/draw/canvas-class";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -94,6 +94,13 @@ interface UIstate {
    * @param clearCanvas - The state to clear the canvas.
    */
   setClearCanvas: (clearCanvas: boolean) => void;
+
+  undo:number;
+  setUndo: (undo:number) => void;
+  redo: number;
+  setRedo:(redo:number) => void;
+  canvasData:string | null;
+  setCanvasData:(canvasData:string | null) => void;
 }
 
 export const useUIstore = create<UIstate>((set) => ({
@@ -134,6 +141,18 @@ export const useUIstore = create<UIstate>((set) => ({
   clearCanvas: false,
   setClearCanvas: (clearCanvas) => {
     set({ clearCanvas });
+  },
+  undo:0,
+  setUndo:(undo) =>{
+    set({ undo })
+  },
+  redo:0,
+  setRedo:(redo) =>{
+    set({ redo })
+  },
+  canvasData:null,
+  setCanvasData: (canvasData) => {
+    set({canvasData})
   },
 }));
 

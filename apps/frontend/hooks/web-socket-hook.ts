@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 
-export function useWebsocket(url: string) {
+export function useWebsocket(token: string | null) {
     const ws = useRef<WebSocket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const [lastMessage, setLastMessage] = useState<MessageEvent | null>(null);
 
     const connect = useCallback(() => {
         if (ws.current) return;
+        console.log(token,'token')
+        if(!token) return ;
 
-        ws.current = new WebSocket(url);
+        ws.current = new WebSocket(`ws://localhost:8080?token=${token}`);
 
         ws.current.onopen = () => {
             setIsConnected(true);
@@ -16,7 +18,8 @@ export function useWebsocket(url: string) {
         };
 
         ws.current.onmessage = (message: MessageEvent) => {
-            setLastMessage(message);
+            const data = JSON.parse(message.data)
+            setLastMessage(data);
         };
 
         ws.current.onclose = () => {
@@ -28,7 +31,7 @@ export function useWebsocket(url: string) {
         ws.current.onerror = (error: Event) => {
             console.error('WebSocket error:', error);
         };
-    }, [url]);
+    }, [token]);
 
     const disconnect = useCallback(() => {
         if (ws.current) {

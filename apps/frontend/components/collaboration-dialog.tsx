@@ -13,6 +13,7 @@ import { useUIstore } from "@/stores"
 import { uploadEncryptedDataToServer } from "@/lib/E2EE"
 import { Check, Circle, Copy, Loader2, Play } from "lucide-react"
 import { useState } from "react"
+import { useWebsocket } from "@/hooks/web-socket-hook"
 
 export function CollaborationDialog() {
     const { dialogState, setDialogState,canvasData } = useUIstore()
@@ -22,6 +23,9 @@ export function CollaborationDialog() {
     const [loading,setLoading] = useState(false)
     const [,setError] = useState('')
     const [copied,setCopied] = useState(false)
+    const token = typeof window !== 'undefined' ? localStorage.getItem('excaliWsToken'): null;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { sendMessage, lastMessage, isConnected } = useWebsocket(token);
     const handleStartSession = async () =>{
         if(!canvasData) return;
         try {
@@ -38,8 +42,6 @@ export function CollaborationDialog() {
         }finally{
             setLoading(false)
         }
-        
-
     }
     return (
         <Dialog open={dialogState.collaboration} onOpenChange={() => setDialogState("collaboration", !dialogState.collaboration)}>
