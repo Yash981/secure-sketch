@@ -26,6 +26,7 @@ wss.on("connection", function connection(ws: WebSocket, req) {
   ws.on("close", (event) => {
     console.log(event, "event");
     console.log("Client disconnected");
+    collobrationManager.removeUser(user.id)
   });
   ws.on("error", (err) => {
     console.error(err);

@@ -14,6 +14,7 @@ import { uploadEncryptedDataToServer } from "@/lib/E2EE"
 import { Check, Circle, Copy, Loader2, Play } from "lucide-react"
 import { useState } from "react"
 import { useWebsocket } from "@/hooks/web-socket-hook"
+import { EventTypes } from "@repo/backend-common"
 
 export function CollaborationDialog() {
     const { dialogState, setDialogState,canvasData } = useUIstore()
@@ -25,7 +26,7 @@ export function CollaborationDialog() {
     const [copied,setCopied] = useState(false)
     const token = typeof window !== 'undefined' ? localStorage.getItem('excaliWsToken'): null;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { sendMessage, lastMessage, isConnected } = useWebsocket(token);
+    const { sendMessage, lastMessage, isConnected,connect,disconnect,ws } = useWebsocket(token);
     const handleStartSession = async () =>{
         if(!canvasData) return;
         try {
@@ -36,6 +37,15 @@ export function CollaborationDialog() {
                 setCurrentUrl(url)
                 setStartSession(true)
             }
+            connect()
+            setTimeout(() => {
+                if(ws.current && ws.current.readyState === WebSocket.OPEN){
+                    sendMessage(JSON.stringify({ type: EventTypes.CREATE_ROOM }));
+                    console.log("Sent CREATE_ROOM after connecting.");
+                    window.history.replaceState('', '', `/admin/${new URL(url).search.slice(4)}/${new URL(url).hash}`);
+                }
+            }, 500);
+
         } catch (error:any) {
             console.log(error,'error upload encryted data')
             setError(error)
@@ -90,7 +100,7 @@ export function CollaborationDialog() {
                             {loading ? 'Starting Session' : 'Start Session'}
                         </Button>
                     ) : (
-                        <Button type="button" variant={"outline"} onClick={() => setStartSession(false)}>
+                        <Button type="button" variant={"outline"} onClick={() => {setStartSession(false);disconnect()}}>
                             <Circle fill="red" stroke="red" /> Stop Session
                         </Button>
                     )}

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { downloadEncryptedDataOnClient } from "@/lib/E2EE";
 
-export default function DownloadPage() {
+export default function CollaborationPage() {
 
   const [decryptedData, setDecryptedData] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);

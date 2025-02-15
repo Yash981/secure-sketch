@@ -96,6 +96,9 @@ importers:
       '@eslint/eslintrc':
         specifier: ^3
         version: 3.2.0
+      '@repo/backend-common':
+        specifier: workspace:*
+        version: link:../../packages/backend-common
       '@types/node':
         specifier: ^20
         version: 20.17.6

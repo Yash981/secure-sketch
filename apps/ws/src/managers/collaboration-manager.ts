@@ -1,6 +1,6 @@
+import { ClientMessage, EventTypes } from '@repo/backend-common';
 import { randomUUID} from 'crypto'
 import { WebSocket } from 'ws';
-import { ClientMessage, EventTypes } from '../types/eventTypes';
 
 export interface UserPresence {
   cursor: {
@@ -107,7 +107,6 @@ export class CollaborationManager {
   private addHandler(user: User) {
     user.socket.on("message", async (data) => {
         const message = JSON.parse(data.toString()) as ClientMessage;
-        console.log(message,'mesga')
         if (message.type === EventTypes.CREATE_ROOM) {
             const roomId = randomUUID(); 
             this.rooms.set(roomId,[user])
@@ -121,7 +120,7 @@ export class CollaborationManager {
             } else {
               user.socket.send(JSON.stringify({type:EventTypes.ERROR,message: "Room does not exist." }))
             }
-        }else if (message.type === EventTypes.CURSOR_MOVE) {
+        } else if (message.type === EventTypes.CURSOR_MOVE) {
           const { roomId, cursor } = message.payload;
       
           this.updateUserPresence(user.id, { cursor });
