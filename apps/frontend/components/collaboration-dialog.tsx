@@ -42,7 +42,7 @@ export function CollaborationDialog() {
                 if(ws.current && ws.current.readyState === WebSocket.OPEN){
                     sendMessage(JSON.stringify({ type: EventTypes.CREATE_ROOM }));
                     console.log("Sent CREATE_ROOM after connecting.");
-                    window.history.replaceState('', '', `/admin/${new URL(url).search.slice(4)}/${new URL(url).hash}`);
+                    window.history.replaceState('', '', `/collaboration/${new URL(url).search.slice(4)}/${new URL(url).hash}`);
                 }
             }, 500);
 

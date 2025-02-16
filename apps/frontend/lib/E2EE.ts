@@ -116,8 +116,7 @@ export const downloadEncryptedDataOnClient = async (url:string) =>{
     console.error('Invalid or missing key in URL!');
     return;
   }
-  const downloadData = await downloadEncryptedContent(urlObj.search.slice(4))
+  const downloadData = await downloadEncryptedContent(urlObj.pathname.split('/')[2])
   const decryptedMessage = await decryptMessage(extractedKey,downloadData);
-  console.log(decryptMessage,'decryptmessage')
   return decryptedMessage
 }

@@ -12,6 +12,7 @@ export default function CollaborationPage() {
     const fetchAndDecrypt = async () => {
 
       try {
+        console.log(window.location.href,'href')
         const data = await downloadEncryptedDataOnClient(window.location.href);
         if(data){
             setDecryptedData(data);
