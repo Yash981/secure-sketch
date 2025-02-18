@@ -26,7 +26,7 @@ export const authenticateUser = (
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as jwt.JwtPayload;
-    req.email = decoded.email;
+    req.email = decoded.userId;
     next();
   } catch (error) {
     res.status(401).json({ message: "Unauthorized" });

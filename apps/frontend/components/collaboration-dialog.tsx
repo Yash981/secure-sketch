@@ -15,6 +15,7 @@ import { Check, Circle, Copy, Loader2, Play } from "lucide-react"
 import { useState } from "react"
 import { useWebsocket } from "@/hooks/web-socket-hook"
 import { EventTypes } from "@repo/backend-common"
+import { useRouter } from "next/navigation"
 
 export function CollaborationDialog() {
     const { dialogState, setDialogState,canvasData } = useUIstore()
@@ -23,10 +24,10 @@ export function CollaborationDialog() {
     const [currentUrl,setCurrentUrl] = useState('')
     const [loading,setLoading] = useState(false)
     const [,setError] = useState('')
+    const router = useRouter()
     const [copied,setCopied] = useState(false)
     const token = typeof window !== 'undefined' ? localStorage.getItem('excaliWsToken'): null;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { sendMessage, lastMessage, isConnected,connect,disconnect,ws } = useWebsocket(token);
+    const { sendMessage, connect,disconnect,ws } = useWebsocket(token);
     const handleStartSession = async () =>{
         if(!canvasData) return;
         try {
@@ -40,9 +41,10 @@ export function CollaborationDialog() {
             connect()
             setTimeout(() => {
                 if(ws.current && ws.current.readyState === WebSocket.OPEN){
-                    sendMessage(JSON.stringify({ type: EventTypes.CREATE_ROOM }));
+                    sendMessage(JSON.stringify({ type: EventTypes.CREATE_ROOM,payload:{roomId:new URL(url).pathname.split('/').pop() }}));
                     console.log("Sent CREATE_ROOM after connecting.");
-                    window.history.replaceState('', '', `/collaboration/${new URL(url).search.slice(4)}/${new URL(url).hash}`);
+                    window.history.replaceState('', '', `/collaboration/${new URL(url).pathname.split('/')[2]}${new URL(url).hash}`);
+                    router.refresh()
                 }
             }, 500);
 

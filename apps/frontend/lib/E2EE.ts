@@ -29,23 +29,28 @@ export async function decryptMessage(
   key: CryptoKey,
   encryptedData: ArrayBuffer
 ): Promise<string> {
-  const buffer = new Uint8Array(encryptedData);
-  const iv = buffer.slice(0, 12);
-  const data = buffer.slice(12);
-  const decryptedData = await window.crypto.subtle.decrypt(
-    {
-      name: "AES-GCM",
-      iv,
-    },
-    key,
-    data
-  );
-  return new TextDecoder().decode(new Uint8Array(decryptedData));
+  const iv = new Uint8Array(encryptedData.slice(0, 12));
+  const data = new Uint8Array(encryptedData.slice(12));
+
+  try {
+    const decryptedData = await window.crypto.subtle.decrypt(
+      {
+        name: "AES-GCM",
+        iv,
+      },
+      key,
+      data
+    );
+
+    return new TextDecoder().decode(decryptedData);
+  } catch (error:any) {
+    throw new Error('Decryption failed. Please check the key and data.',error);
+  }
 }
 export const uploadContentToserver = async (
   encryptedData: ArrayBuffer
 ): Promise<string> => {
-  const response = await fetch("http://localhost:9000/api/v1/upload", { method: "POST", body: encryptedData,headers:{ "Content-Type": "application/octet-stream" } })
+  const response = await fetch("http://localhost:9000/api/v1/upload", { method: "POST", body: encryptedData,headers:{ "Content-Type": "application/octet-stream" },credentials:"include" })
   
   const {url} = await response.json();
   return url
@@ -61,8 +66,9 @@ export const generateShareableURL = async (
   return url;
 };
 export const downloadEncryptedContent = async (id: string): Promise<ArrayBuffer> => {
-  const response = await fetch(`http://localhost:9000/api/v1/download?id=${id}`);
-  return response.arrayBuffer()
+  const response = await fetch(`http://localhost:9000/api/v1/download?id=${id}`,{credentials:"include"});
+  const res = await response.arrayBuffer()
+  return res
 };
 export async function ExtractKeyFromURL():Promise<CryptoKey | null> {
     const hashedValue = window.location.hash
@@ -82,31 +88,12 @@ export async function ExtractKeyFromURL():Promise<CryptoKey | null> {
     
 }
 
-// export async function testExample() {
-//     const key = await generateKey();
-//     const message = "Hey, this is a secret msg!";
-//     const encryptedData = await encryptMessage(key, message);
-    
-
-//     const shareableURL = await generateShareableURL(key, encryptedData);
-//     const urlObj = new URL(shareableURL)
-//     window.location.hash = urlObj.hash; 
-//     const extractedKey = await ExtractKeyFromURL();
-//     if (!extractedKey) {
-//         console.error("Invalid or missing key in URL!");
-//         return;
-//     }
-//     const downloadedData = await downloadEncryptedContent(urlObj.search.slice(4));
-
-//     const decryptedMessage = await decryptMessage(extractedKey, downloadedData);
-//     console.log("Decrypted Message:", decryptedMessage);
-// }
-
 export const uploadEncryptedDataToServer = async (data:string) =>{
   const key = await generateKey();
   const encryptedData = await encryptMessage(key,data)
   const shareableURL = await generateShareableURL(key,encryptedData);
-  return shareableURL
+  const newUrl = new URL(shareableURL)
+  return `${newUrl.origin}${newUrl.pathname}/${newUrl.search.slice(4)}${newUrl.hash}`
 
 }
 export const downloadEncryptedDataOnClient = async (url:string) =>{

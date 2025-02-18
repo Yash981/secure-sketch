@@ -102,17 +102,17 @@ export class CollaborationManager {
     for (const user of users) {
       if (excludeUserId && user.id === excludeUserId) continue;
       user.socket.send(message);
-    }
+    } 
   }
   private addHandler(user: User) {
     user.socket.on("message", async (data) => {
         const message = JSON.parse(data.toString()) as ClientMessage;
         if (message.type === EventTypes.CREATE_ROOM) {
-            const roomId = randomUUID(); 
+            const {roomId}:{roomId:string} = message.payload
             this.rooms.set(roomId,[user])
             user.socket.send(JSON.stringify({ type: EventTypes.ROOM_CREATED, roomId })); 
         } else if (message.type === EventTypes.JOIN_ROOM) {
-            const { roomId }:{roomId:string} = message.payload; 
+            const { roomId }:{roomId:string} = message.payload;
             if(this.rooms.has(roomId)){
               this.rooms.get(roomId)?.push(user)
               user.socket.send(JSON.stringify({ type: EventTypes.JOINED_ROOM, roomId })); 

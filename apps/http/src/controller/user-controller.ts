@@ -7,6 +7,7 @@ import {
   hashPassword,
 } from "../services/auth-service";
 import { UserAuthFormSchema } from "@repo/shared-schema";
+import { prisma } from "@repo/db";
 const storage: Record<string, Buffer> = {};
 export const UserSignUp = async (req: Request, res: Response) => {
   const parsedSignUpData = UserAuthFormSchema.safeParse(req.body);
@@ -78,20 +79,42 @@ export const UserSignIn = async (req: Request, res: Response) => {
   }
 };
 export const UploadEncryptedData = async(req:Request,res:Response) =>{
-  const fileId = crypto.randomUUID()
-  storage[fileId] = req.body
-  console.log(storage,'storage')
-  res.json({ url: `http://localhost:${3000}/collaboration?id=${fileId}` });
+  const getUserId = await prisma.user.findUnique({
+    where:{
+      email:req.email
+    }
+  })
+  if(!getUserId){
+    res.status(401).json({message:"User doesn't exist"})
+    return;
+  }
+  if (!req.body || !Buffer.isBuffer(req.body)) {
+    res.status(400).json({ error: 'Invalid encrypted data' });
+    return
+  }
+  const uploadEncryptedContent = await prisma.drawing.create({
+    data:{
+      encryptedData:new Uint8Array(req.body),
+      ownerId:getUserId?.id,
+    } 
+  })
+  res.json({url:`http://localhost:3000/collaboration?id=${uploadEncryptedContent.id}`})
 }
 export const downloadEncryptedContent = async(req:Request,res:Response) =>{
     const { id } = req.query;
     
-    if (!id || typeof id !== "string" || !storage[id]) {
+    if (!id || typeof id !== "string") {
         res.status(404).json({ error: "File not found" });
         return
     }
-
+    const getEncryptedContent = await prisma.drawing.findUnique({
+      where:{
+        id:id
+      }
+    })
+    if(!getEncryptedContent || !getEncryptedContent.encryptedData){
+      return;
+    }
     res.setHeader("Content-Type", "application/octet-stream");
-    res.send(storage[id]); 
-    
+    res.send(Buffer.from(getEncryptedContent?.encryptedData))
 }

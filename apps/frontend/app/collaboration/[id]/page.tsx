@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { downloadEncryptedDataOnClient } from "@/lib/E2EE";
+import { useWebsocket } from "@/hooks/web-socket-hook";
+import { EventTypes } from "@repo/backend-common";
+import CanvasComponent from "@/components/canvas-component";
 
 export default function CollaborationPage() {
-
+  const {connect,sendMessage} = useWebsocket(typeof window !== 'undefined' ? localStorage.getItem('excaliWsToken'):null)
   const [decryptedData, setDecryptedData] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
   useEffect(() => {
     const fetchAndDecrypt = async () => {
 
@@ -16,6 +18,14 @@ export default function CollaborationPage() {
         const data = await downloadEncryptedDataOnClient(window.location.href);
         if(data){
             setDecryptedData(data);
+            connect()
+            setTimeout(()=>{
+            const roomId = window.location.pathname.split("/").pop();
+            console.log(roomId)
+            if(roomId){
+              sendMessage(JSON.stringify({type:EventTypes.JOIN_ROOM,payload:{roomId}}))
+            }
+          },500)
         }
       } catch(error) {
         console.log(error,'error')
@@ -32,9 +42,7 @@ export default function CollaborationPage() {
   return (
     <div className="flex flex-wrap w-full">
   <h1 className="w-full">Decrypted File:</h1>
-  <div className="w-full overflow-auto border p-2">
-    <pre className="break-words whitespace-pre-wrap">{decryptedData}</pre>
-  </div>
+  <CanvasComponent decryptedData={decryptedData}/>
 </div>
 
   );

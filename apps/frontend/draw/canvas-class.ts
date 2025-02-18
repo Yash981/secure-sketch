@@ -49,6 +49,7 @@ export class CanvasGame {
     this.viewportTransform = null;
     this.eraser = 10;
     this.initializeCanvasEvents();
+    this.initCanvas()
     // this.undoStack = [];
     // this.redoStack = [];
     // this.currentState = this.canvas.toJSON();
@@ -537,4 +538,27 @@ private handlePanEnd = () => {
   
   //   return true;
   // }
+  initCanvas() {
+    if (!this.canvas) {
+      console.error("Canvas is not initialized.");
+      return;
+    }
+  
+    this.canvas.clear();
+    this.canvas.renderAll();
+  }
+  applyCanvasUpdate(data: string) {
+    try {
+      if (!this.canvas) {
+        console.error("Canvas is not initialized yet.");
+        return;
+      }
+      const jsonData = JSON.parse(data);
+      this.canvas.loadFromJSON(jsonData, () => {
+        this.canvas.requestRenderAll();
+      });
+    } catch (error) {
+      console.error("Failed to apply canvas update:", error);
+    }
+  }
 }

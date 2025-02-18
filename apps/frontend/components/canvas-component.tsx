@@ -4,34 +4,34 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useUIstore, useZoomStore } from '@/stores';
 import { CanvasGame } from '@/draw/canvas-class';  // Adjust import path as needed
 
-const CanvasComponent = () => {
-  const { selectedTool, setSelectedTool, isFilled, opacity, strokeWidth, color, clearCanvas, setClearCanvas,dialogState,setCanvasData} = useUIstore();
-  const {zoom} = useZoomStore()
+const CanvasComponent = ({decryptedData}:any) => {
+  const { selectedTool, setSelectedTool, isFilled, opacity, strokeWidth, color, clearCanvas, setClearCanvas, dialogState, setCanvasData } = useUIstore();
+  const { zoom } = useZoomStore()
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasGameRef = useRef<CanvasGame | null>(null);
   const [dimensions, setDimensions] = useState<{ width: number; height: number }>({
     width: window.innerWidth,
     height: window.innerHeight
   });
-
+  console.log(decryptedData,'decrpyted')
   useEffect(() => {
     if (!canvasRef.current) return;
-      const canvas = new Canvas(canvasRef.current, {
-        selection: false,
-        perPixelTargetFind: true,
-        fireRightClick: true,
-        stopContextMenu: true,
-      });
-      const centerX = -dimensions.width / 4;
-      const centerY = -dimensions.height / 4;
-      canvas.setViewportTransform([1, 0, 0, 1, centerX, centerY]);
+    const canvas = new Canvas(canvasRef.current, {
+      selection: false,
+      perPixelTargetFind: true,
+      fireRightClick: true,
+      stopContextMenu: true,
+    });
+    const centerX = -dimensions.width / 4;
+    const centerY = -dimensions.height / 4;
+    canvas.setViewportTransform([1, 0, 0, 1, centerX, centerY]);
 
-      const canvasGame = new CanvasGame(canvas, selectedTool, setSelectedTool, isFilled, opacity, strokeWidth, color);
-      canvasGameRef.current = canvasGame;
+    const canvasGame = new CanvasGame(canvas, selectedTool, setSelectedTool, isFilled, opacity, strokeWidth, color);
+    canvasGameRef.current = canvasGame;
 
-      canvasGame.render();
+    canvasGame.render();
 
-      canvasGame.loadCanvasState();
+    canvasGame.loadCanvasState();
 
 
 
@@ -83,22 +83,12 @@ const CanvasComponent = () => {
   useEffect(() => {
     if (canvasGameRef.current) canvasGameRef.current?.zoomCanvas(zoom)
   }, [zoom])
-useEffect(()=>{
-  if(dialogState.collaboration && canvasGameRef.current){
-    setCanvasData(canvasGameRef.current?.getCurrentCanvasState())
-  }
-  //eslint-disable-next-line
-},[dialogState.collaboration])
-  // useEffect(()=>{
-  //   if(undo && canvasGameRef.current) {
-  //     canvasGameRef.current?.undo()
-  //   }
-  // },[undo])
-  // useEffect(()=>{
-  //   if(redo && canvasGameRef.current){
-  //     canvasGameRef.current?.redo()
-  //   }
-  // },[redo])
+  useEffect(() => {
+    if (dialogState.collaboration && canvasGameRef.current) {
+      setCanvasData(canvasGameRef.current?.getCurrentCanvasState())
+    }
+    //eslint-disable-next-line
+  }, [dialogState.collaboration])
   return (
     <div style={{
       width: '100vw',
@@ -114,7 +104,7 @@ useEffect(()=>{
         height={dimensions.height}
         style={{
           position: 'absolute',
-          touchAction: 'none' 
+          touchAction: 'none'
         }}
       />
     </div>

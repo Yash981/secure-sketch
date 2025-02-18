@@ -21,13 +21,12 @@ model User {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   drawings     Drawing[] // Relation to drawings created by the user
-  sharedLinks  SharedLink[] // Relation to shared links
   Collaborator Collaborator[]
 }
 
 model Drawing {
   id            String         @id @default(cuid())
-  title         String
+  title         String?
   description   String?
   encryptedData Bytes 
   ownerId       String
@@ -35,7 +34,6 @@ model Drawing {
   collaborators Collaborator[] 
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-  SharedLink    SharedLink[]
 }
 
 model Collaborator {
@@ -46,16 +44,6 @@ model Collaborator {
   user      User     @relation(fields: [userId], references: [id])
   role      Role     @default(VIEWER) // Role: VIEWER, EDITOR, OWNER
   createdAt DateTime @default(now())
-}
-
-model SharedLink {
-  id            String    @id @default(cuid())
-  drawingId     String
-  drawing       Drawing   @relation(fields: [drawingId], references: [id])
-  createdAt     DateTime  @default(now())
-  expiresAt     DateTime? // Optional expiration date for the link
-  User          User?     @relation(fields: [userId], references: [id])
-  userId        String?
 }
 
 enum Role {
