@@ -32,10 +32,13 @@ const CanvasComponent = ({decryptedData}:any) => {
     canvasGame.render();
 
     canvasGame.loadCanvasState();
-
-
+    canvas.on("mouse:dblclick",function(event){
+      canvasGame.mouseDblClick(event)
+    })
+    
 
     return () => {
+      canvas.off("mouse:dblclick",canvasGame.mouseDblClick)
       canvasGame?.dispose()
 
     };

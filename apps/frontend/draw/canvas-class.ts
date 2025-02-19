@@ -49,13 +49,12 @@ export class CanvasGame {
     this.viewportTransform = null;
     this.eraser = 10;
     this.initializeCanvasEvents();
-    this.initCanvas()
+    this.initCanvas();
     // this.undoStack = [];
     // this.redoStack = [];
     // this.currentState = this.canvas.toJSON();
     // this.saveState();
     // this.isUndoingRedoing = false
-    
   }
   private initializeCanvasEvents() {
     this.canvas.on("object:modified", this.handleObjectModified.bind(this));
@@ -353,8 +352,11 @@ export class CanvasGame {
       })
     );
   }
-  getCurrentCanvasState(){
-    return JSON.stringify({canvas:this.canvas.toJSON(),viewportTransform:this.canvas.viewportTransform})
+  getCurrentCanvasState() {
+    return JSON.stringify({
+      canvas: this.canvas.toJSON(),
+      viewportTransform: this.canvas.viewportTransform,
+    });
   }
   loadCanvasState() {
     const savedState = localStorage.getItem("canvas");
@@ -416,7 +418,7 @@ export class CanvasGame {
   }
   private handlePanStart = (event: any) => {
     if (this.selectedTool !== "pan") return;
-    
+
     const target = event.target;
     if (target && target.selectable) return;
 
@@ -428,10 +430,12 @@ export class CanvasGame {
     this.lastPanY = pointer.y;
 
     this.canvas.selection = false;
-    this.canvas.forEachObject((obj) => obj.set({ selectable: false, evented: false }));
-};
+    this.canvas.forEachObject((obj) =>
+      obj.set({ selectable: false, evented: false })
+    );
+  };
 
-private handlePanMove = (event: any) => {
+  private handlePanMove = (event: any) => {
     if (!this.isPanning) return;
 
     const pointer = this.canvas.getPointer(event.e);
@@ -449,18 +453,19 @@ private handlePanMove = (event: any) => {
 
     this.lastPanX = pointer.x;
     this.lastPanY = pointer.y;
-};
+  };
 
-private handlePanEnd = () => {
+  private handlePanEnd = () => {
     this.isPanning = false;
     this.canvas.defaultCursor = "grab";
 
     this.canvas.selection = true;
-    this.canvas.forEachObject((obj) => obj.set({ selectable: true, evented: true }));
+    this.canvas.forEachObject((obj) =>
+      obj.set({ selectable: true, evented: true })
+    );
 
     this.saveCanvasState();
-};
-
+  };
 
   // private saveState() {
   //   this.canvas.on("object:added", this.performAction.bind(this));
@@ -472,7 +477,7 @@ private handlePanEnd = () => {
   //   // console.log(typeof newState,typeof this.currentState,'typeof')
   //   if (!this.deepEqual(newState, this.currentState)) {
   //     if (this.currentState) {
-  //       this.undoStack.push({ ...this.currentState }); 
+  //       this.undoStack.push({ ...this.currentState });
   //     }
   //     this.currentState = newState;
   //     this.redoStack = [];
@@ -522,20 +527,20 @@ private handlePanEnd = () => {
   // }
   // private deepEqual(obj1: any, obj2: any): boolean {
   //   if (obj1 === obj2) return true; // Same reference
-  
+
   //   if (typeof obj1 !== "object" || typeof obj2 !== "object" || obj1 === null || obj2 === null) {
   //     return obj1 === obj2; // Primitive values
   //   }
-  
+
   //   const keys1 = Object.keys(obj1);
   //   const keys2 = Object.keys(obj2);
-  
+
   //   if (keys1.length !== keys2.length) return false; // Different number of keys
-  
+
   //   for (const key of keys1) {
-  //     if (!this.deepEqual(obj1[key], obj2[key])) return false; 
+  //     if (!this.deepEqual(obj1[key], obj2[key])) return false;
   //   }
-  
+
   //   return true;
   // }
   initCanvas() {
@@ -543,7 +548,7 @@ private handlePanEnd = () => {
       console.error("Canvas is not initialized.");
       return;
     }
-  
+
     this.canvas.clear();
     this.canvas.renderAll();
   }
@@ -560,5 +565,27 @@ private handlePanEnd = () => {
     } catch (error) {
       console.error("Failed to apply canvas update:", error);
     }
+  }
+  mouseDblClick(event: any) {
+    this.canvas.defaultCursor = "crosshair";
+    const pointer = this.canvas.getPointer(event.e);
+    const text = new IText("", {
+      left: pointer.x,
+      top: pointer.y,
+      fontSize: 20,
+      fontFamily: "Arial",
+      fill: "#000",
+      editable: true,
+    });
+
+    this.canvas.add(text);
+    this.canvas.setActiveObject(text);
+    text.enterEditing();
+    this.canvas.defaultCursor = "text";
+
+    text.on("editing:exited", () => {
+      this.canvas.defaultCursor = "default";
+      this.setSelectedTool("select");
+    });
   }
 }
