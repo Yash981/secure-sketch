@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useUIstore, useZoomStore } from '@/stores';
 import { CanvasGame } from '@/draw/canvas-class';  // Adjust import path as needed
 
-const CanvasComponent = ({decryptedData}:any) => {
+const CanvasComponent = ({ decryptedData }: any) => {
   const { selectedTool, setSelectedTool, isFilled, opacity, strokeWidth, color, clearCanvas, setClearCanvas, dialogState, setCanvasData } = useUIstore();
   const { zoom } = useZoomStore()
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -13,8 +13,8 @@ const CanvasComponent = ({decryptedData}:any) => {
     width: window.innerWidth,
     height: window.innerHeight
   });
-  console.log(decryptedData,'decrpyted')
   useEffect(() => {
+    if(decryptedData) return;
     if (!canvasRef.current) return;
     const canvas = new Canvas(canvasRef.current, {
       selection: false,
@@ -32,14 +32,22 @@ const CanvasComponent = ({decryptedData}:any) => {
     canvasGame.render();
 
     canvasGame.loadCanvasState();
-    canvas.on("mouse:dblclick",function(event){
+    canvas.on("mouse:dblclick", function (event) {
       canvasGame.mouseDblClick(event)
     })
-    
+
 
     return () => {
-      canvas.off("mouse:dblclick",canvasGame.mouseDblClick)
-      canvasGame?.dispose()
+      console.log("Cleaning up canvas before disposing...");
+
+      if (canvasGameRef.current?.canvas) {
+        canvasGameRef.current.canvas.clear();
+      }
+
+      canvas.off("mouse:dblclick", canvasGame.mouseDblClick);
+
+      canvasGameRef.current?.dispose();
+      canvasGameRef.current = null;
 
     };
     //eslint-disable-next-line
@@ -92,6 +100,47 @@ const CanvasComponent = ({decryptedData}:any) => {
     }
     //eslint-disable-next-line
   }, [dialogState.collaboration])
+  useEffect(() => {
+    if (decryptedData) {
+      if (canvasGameRef.current) {
+        console.log("Disposing old canvasGame instance and creating a new one.");
+        canvasGameRef.current.dispose();
+        canvasGameRef.current = null;
+      }
+
+      if (canvasRef.current) {
+        const newCanvas = new Canvas(canvasRef.current, {
+          selection: false,
+          perPixelTargetFind: true,
+          fireRightClick: true,
+          stopContextMenu: true,
+        });
+
+        const newCanvasGame = new CanvasGame(
+          newCanvas,
+          selectedTool,
+          setSelectedTool,
+          isFilled,
+          opacity,
+          strokeWidth,
+          color
+        );
+
+        canvasGameRef.current = newCanvasGame;
+
+        newCanvasGame.loadDecryptedData(decryptedData);
+        return () => {
+          if (canvasGameRef.current?.canvas) {
+            canvasGameRef.current.canvas.clear();
+          }
+          newCanvasGame.dispose()
+          canvasGameRef.current = null
+        }
+      }
+    }
+  }, [decryptedData]);
+
+
   return (
     <div style={{
       width: '100vw',

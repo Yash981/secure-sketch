@@ -14,14 +14,12 @@ export default function CollaborationPage() {
     const fetchAndDecrypt = async () => {
 
       try {
-        console.log(window.location.href,'href')
         const data = await downloadEncryptedDataOnClient(window.location.href);
         if(data){
             setDecryptedData(data);
             connect()
             setTimeout(()=>{
             const roomId = window.location.pathname.split("/").pop();
-            console.log(roomId)
             if(roomId){
               sendMessage(JSON.stringify({type:EventTypes.JOIN_ROOM,payload:{roomId}}))
             }
