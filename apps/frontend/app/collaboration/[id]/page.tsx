@@ -7,7 +7,7 @@ import { EventTypes } from "@repo/backend-common";
 import CanvasComponent from "@/components/canvas-component";
 
 export default function CollaborationPage() {
-  const {connect,sendMessage} = useWebsocket(typeof window !== 'undefined' ? localStorage.getItem('excaliWsToken'):null)
+  const {connect,sendMessage,lastMessage} = useWebsocket(typeof window !== 'undefined' ? localStorage.getItem('excaliWsToken'):null)
   const [decryptedData, setDecryptedData] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
@@ -40,7 +40,7 @@ export default function CollaborationPage() {
   return (
     <div className="flex flex-wrap w-full">
   <h1 className="w-full">Decrypted File:</h1>
-  <CanvasComponent decryptedData={decryptedData}/>
+  <CanvasComponent decryptedData={decryptedData} sendMessage={sendMessage} lastMessage={lastMessage}/>
 </div>
 
   );

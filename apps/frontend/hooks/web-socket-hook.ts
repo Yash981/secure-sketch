@@ -3,7 +3,7 @@ import { useRef, useState, useCallback } from "react";
 export function useWebsocket(token: string | null) {
   const ws = useRef<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [lastMessage, setLastMessage] = useState<MessageEvent | null>(null);
+  const [lastMessage, setLastMessage] = useState<any | null>(null);
 
   const connect = useCallback(() => {
     if (ws.current) return;
@@ -44,7 +44,6 @@ export function useWebsocket(token: string | null) {
 
   const sendMessage = useCallback(
     (data: string) => {
-      console.log(ws.current, isConnected, data, "sendmessage");
       if (ws.current && ws.current.readyState === WebSocket.OPEN) {
         ws.current.send(data);
       } else {

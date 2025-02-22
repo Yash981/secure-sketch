@@ -102,7 +102,7 @@ export function CollaborationDialog() {
                             {loading ? 'Starting Session' : 'Start Session'}
                         </Button>
                     ) : (
-                        <Button type="button" variant={"outline"} onClick={() => {setStartSession(false);disconnect()}}>
+                        <Button type="button" variant={"outline"} onClick={() => {setStartSession(false);disconnect();router.push('/')}}>
                             <Circle fill="red" stroke="red" /> Stop Session
                         </Button>
                     )}

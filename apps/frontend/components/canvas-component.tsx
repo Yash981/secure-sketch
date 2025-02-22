@@ -1,10 +1,11 @@
 "use client";
-import { Canvas } from 'fabric';
+import { Canvas, Group, Rect, Text, Triangle } from 'fabric';
 import React, { useEffect, useRef, useState } from 'react';
 import { useUIstore, useZoomStore } from '@/stores';
 import { CanvasGame } from '@/draw/canvas-class';  // Adjust import path as needed
+import { EventTypes } from '@repo/backend-common';
 
-const CanvasComponent = ({ decryptedData }: any) => {
+const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decryptedData: string, sendMessage: (data: string) => void, lastMessage: any | null }) => {
   const { selectedTool, setSelectedTool, isFilled, opacity, strokeWidth, color, clearCanvas, setClearCanvas, dialogState, setCanvasData } = useUIstore();
   const { zoom } = useZoomStore()
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -14,7 +15,7 @@ const CanvasComponent = ({ decryptedData }: any) => {
     height: window.innerHeight
   });
   useEffect(() => {
-    if(decryptedData) return;
+    if (decryptedData) return;
     if (!canvasRef.current) return;
     const canvas = new Canvas(canvasRef.current, {
       selection: false,
@@ -129,7 +130,24 @@ const CanvasComponent = ({ decryptedData }: any) => {
         canvasGameRef.current = newCanvasGame;
 
         newCanvasGame.loadDecryptedData(decryptedData);
+        //send mouseMovement
+        newCanvas.on("mouse:move", function (event) {
+          if (!event.scenePoint) return;
+          setTimeout(() => {
+            sendMessage(JSON.stringify({
+              type: EventTypes.CURSOR_MOVE,
+              payload: {
+                roomId: window.location.pathname.split("/").pop(),
+                cursor: {
+                  x: event.scenePoint.x,
+                  y: event.scenePoint.y
+                }
+              }
+            }))
+          }, 100);
+        })
         return () => {
+          newCanvas.off("mouse:move");
           if (canvasGameRef.current?.canvas) {
             canvasGameRef.current.canvas.clear();
           }
@@ -138,7 +156,95 @@ const CanvasComponent = ({ decryptedData }: any) => {
         }
       }
     }
+    //eslint-disable-next-line
   }, [decryptedData]);
+
+  useEffect(() => {
+    console.log(canvasGameRef.current, "canvasGameRef.current");
+    if (!canvasGameRef.current || !lastMessage) return;
+
+    console.log(lastMessage, "lastMessage");
+    if (lastMessage.type === EventTypes.CURSOR_MOVED) {
+      const { userId, cursor, color, displayName } = lastMessage;
+      const { x, y } = cursor;
+
+      let currentCursor = canvasGameRef.current.canvas.getObjects().find((obj: any) => obj.id === userId);
+
+      if (!currentCursor) {
+        const arrow = new Triangle({
+          width: 20,
+          height: 20,
+          fill: color,
+          selectable: false,
+          evented: false,
+          originX: "center",
+          originY: "bottom",
+        });
+        const textWidth = displayName.length * 8; 
+        const textHeight = 20; 
+
+        const bgRect = new Rect({
+          width: textWidth,
+          height: textHeight,
+          fill: color,
+          rx: 2,
+          ry: 2, 
+          originX: "center",
+          originY: "top",
+          selectable: false,
+          evented: false,
+          borderColor: 'black',
+          strokeWidth: 1,
+
+        });
+        const nameText = new Text(displayName, {
+          fontSize: 13,
+          fill: 'black',
+          textBackgroundColor: color,
+          selectable: false,
+          evented: false,
+          originX: "center",
+          originY: "top",
+          fontFamily: 'Arial',
+          fontWeight: 400,
+          fontStyle: 'normal',
+          textAlign: 'center',
+          top: 4,
+        });
+        const nameLabel = new Group([bgRect, nameText], {
+          originX: "center",
+          originY: "top",
+          selectable: false,
+          evented: false,
+          top:5,
+          left:0,
+        });
+        currentCursor = new Group([arrow, nameLabel], {
+          left: x,
+          top: y,
+          selectable: false,
+          evented: false,
+
+        });
+        currentCursor.set("id", userId);
+        canvasGameRef.current.canvas.add(currentCursor);
+      } else {
+        currentCursor.set({ left: x, top: y });
+        const objects = currentCursor.group?.getObjects();
+        if (objects && objects.length >= 2) {
+          const [arrow, nameLabel] = objects;
+          console.log(nameLabel, "nameLabel",color,'color');
+          arrow.set({ fill: color });
+          nameLabel.set({ fill:color,textBackgroundColor: color, text: displayName });
+        }
+
+        currentCursor.setCoords();
+      }
+
+      canvasGameRef.current.canvas.requestRenderAll();
+    }
+  }, [lastMessage]);
+
 
 
   return (

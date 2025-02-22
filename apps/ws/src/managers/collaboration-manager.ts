@@ -4,8 +4,8 @@ import { WebSocket } from 'ws';
 
 export interface UserPresence {
   cursor: {
-    line: number;
-    column: number;
+    x:number,
+    y:number
   };
   selection?: {
     start: { line: number; column: number };
@@ -37,8 +37,8 @@ export class User {
     this.color = this.generateColor()
     this.presence = {
       cursor: {
-        line: initialPresence?.cursor?.line ?? 0,
-        column: initialPresence?.cursor?.column ?? 0,
+        x: initialPresence?.cursor?.x ?? 0,
+        y: initialPresence?.cursor?.y ?? 0,
       },
       selection: initialPresence?.selection,
     };
@@ -128,7 +128,7 @@ export class CollaborationManager {
           this.broadcastToRoom(
               roomId,
               JSON.stringify({
-                  type: EventTypes.CURSOR_MOVE,
+                  type: EventTypes.CURSOR_MOVED,
                   userId: user.id,
                   cursor,
                   color:user.color,
