@@ -5,7 +5,7 @@ import { useUIstore, useZoomStore } from '@/stores';
 import { CanvasGame } from '@/draw/canvas-class';  // Adjust import path as needed
 import { EventTypes } from '@repo/backend-common';
 
-const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decryptedData: string, sendMessage: (data: string) => void, lastMessage: any | null }) => {
+const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decryptedData?: string, sendMessage?: (data: string) => void, lastMessage?: any | null }) => {
   const { selectedTool, setSelectedTool, isFilled, opacity, strokeWidth, color, clearCanvas, setClearCanvas, dialogState, setCanvasData } = useUIstore();
   const { zoom } = useZoomStore()
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -14,6 +14,7 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
     width: window.innerWidth,
     height: window.innerHeight
   });
+  const cursorPosition = useRef<{ x: number; y: number } | null>(null);
   useEffect(() => {
     if (decryptedData) return;
     if (!canvasRef.current) return;
@@ -104,7 +105,6 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
   useEffect(() => {
     if (decryptedData) {
       if (canvasGameRef.current) {
-        console.log("Disposing old canvasGame instance and creating a new one.");
         canvasGameRef.current.dispose();
         canvasGameRef.current = null;
       }
@@ -130,24 +130,31 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
         canvasGameRef.current = newCanvasGame;
 
         newCanvasGame.loadDecryptedData(decryptedData);
+
         //send mouseMovement
         newCanvas.on("mouse:move", function (event) {
           if (!event.scenePoint) return;
-          setTimeout(() => {
-            sendMessage(JSON.stringify({
-              type: EventTypes.CURSOR_MOVE,
-              payload: {
-                roomId: window.location.pathname.split("/").pop(),
-                cursor: {
-                  x: event.scenePoint.x,
-                  y: event.scenePoint.y
-                }
-              }
-            }))
-          }, 100);
+          cursorPosition.current = {
+            x: event.scenePoint.x,
+            y: event.scenePoint.y,
+          }
         })
+          const sendCursorUpdates = () =>{
+            if(cursorPosition.current && sendMessage){
+              sendMessage(JSON.stringify({
+                type: EventTypes.CURSOR_MOVE,
+                payload: {
+                  roomId: window.location.pathname.split("/").pop(),
+                  cursor: cursorPosition.current,
+                }
+              }))
+              cursorPosition.current = null;
+            }
+          }
+        const intervalId = setInterval(sendCursorUpdates,100)
         return () => {
           newCanvas.off("mouse:move");
+          clearInterval(intervalId);
           if (canvasGameRef.current?.canvas) {
             canvasGameRef.current.canvas.clear();
           }
@@ -160,15 +167,13 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
   }, [decryptedData]);
 
   useEffect(() => {
-    console.log(canvasGameRef.current, "canvasGameRef.current");
     if (!canvasGameRef.current || !lastMessage) return;
-
-    console.log(lastMessage, "lastMessage");
+    const canvas = canvasGameRef.current.canvas;
     if (lastMessage.type === EventTypes.CURSOR_MOVED) {
       const { userId, cursor, color, displayName } = lastMessage;
       const { x, y } = cursor;
 
-      let currentCursor = canvasGameRef.current.canvas.getObjects().find((obj: any) => obj.id === userId);
+      let currentCursor = canvas.getObjects().find((obj: any) => obj.id === userId);
 
       if (!currentCursor) {
         const arrow = new Triangle({
@@ -227,7 +232,7 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
 
         });
         currentCursor.set("id", userId);
-        canvasGameRef.current.canvas.add(currentCursor);
+        canvas.add(currentCursor);
       } else {
         currentCursor.set({ left: x, top: y });
         const objects = currentCursor.group?.getObjects();
@@ -237,11 +242,19 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
           arrow.set({ fill: color });
           nameLabel.set({ fill:color,textBackgroundColor: color, text: displayName });
         }
-
         currentCursor.setCoords();
       }
 
-      canvasGameRef.current.canvas.requestRenderAll();
+      canvas.requestRenderAll();
+    } else if (lastMessage.type === EventTypes.USER_LEFT) {
+      // console.log('going to remove cursor')
+      const { userId } = lastMessage.payload;
+      const cursorToRemove = canvas.getObjects().find((obj: any) => obj.id === userId);
+      
+      if (cursorToRemove) {
+        canvas.remove(cursorToRemove);
+        canvas.requestRenderAll();
+      }
     }
   }, [lastMessage]);
 

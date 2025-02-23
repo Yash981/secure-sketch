@@ -1,13 +1,16 @@
-"use client"; 
+"use client";
 
 import { useEffect, useState } from "react";
 import { downloadEncryptedDataOnClient } from "@/lib/E2EE";
 import { useWebsocket } from "@/hooks/web-socket-hook";
 import { EventTypes } from "@repo/backend-common";
 import CanvasComponent from "@/components/canvas-component";
+import { TopBar } from "@/components/top-bar";
+import DrawingSelection from "@/components/drawing-selections";
+import ZoomCanvas from "@/components/zoom-canvas";
 
 export default function CollaborationPage() {
-  const {connect,sendMessage,lastMessage} = useWebsocket(typeof window !== 'undefined' ? localStorage.getItem('excaliWsToken'):null)
+  const { connect, sendMessage, lastMessage } = useWebsocket(typeof window !== 'undefined' ? localStorage.getItem('excaliWsToken') : null)
   const [decryptedData, setDecryptedData] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
@@ -15,18 +18,18 @@ export default function CollaborationPage() {
 
       try {
         const data = await downloadEncryptedDataOnClient(window.location.href);
-        if(data){
-            setDecryptedData(data);
-            connect()
-            setTimeout(()=>{
+        if (data) {
+          setDecryptedData(data);
+          connect()
+          setTimeout(() => {
             const roomId = window.location.pathname.split("/").pop();
-            if(roomId){
-              sendMessage(JSON.stringify({type:EventTypes.JOIN_ROOM,payload:{roomId}}))
+            if (roomId) {
+              sendMessage(JSON.stringify({ type: EventTypes.JOIN_ROOM, payload: { roomId } }))
             }
-          },500)
+          }, 500)
         }
-      } catch(error) {
-        console.log(error,'error')
+      } catch (error) {
+        console.log(error, 'error')
         setError("Failed to decrypt or download the file.");
       }
     };
@@ -38,10 +41,12 @@ export default function CollaborationPage() {
   if (!decryptedData) return <h1>Downloading and decrypting...</h1>;
 
   return (
-    <div className="flex flex-wrap w-full">
-  <h1 className="w-full">Decrypted File:</h1>
-  <CanvasComponent decryptedData={decryptedData} sendMessage={sendMessage} lastMessage={lastMessage}/>
-</div>
+    <div className="relative w-screen h-screen">
+      <TopBar className="fixed top-3 left-1/2 transform -translate-x-1/2 z-10"/>
+      <CanvasComponent decryptedData={decryptedData} sendMessage={sendMessage} lastMessage={lastMessage} />
+      <DrawingSelection/>
+      <ZoomCanvas/>
+    </div>
 
   );
 }

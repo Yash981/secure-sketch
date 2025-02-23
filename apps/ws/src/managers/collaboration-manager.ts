@@ -1,11 +1,11 @@
-import { ClientMessage, EventTypes } from '@repo/backend-common';
-import { randomUUID} from 'crypto'
-import { WebSocket } from 'ws';
+import { ClientMessage, EventTypes } from "@repo/backend-common";
+import { randomUUID } from "crypto";
+import { WebSocket } from "ws";
 
 export interface UserPresence {
   cursor: {
-    x:number,
-    y:number
+    x: number;
+    y: number;
   };
   selection?: {
     start: { line: number; column: number };
@@ -20,8 +20,8 @@ export class User {
   public displayName: string;
   public presence: UserPresence;
   public lastActiveAt: number;
-  public color?: string; 
-  public encryptedData?: string; 
+  public color?: string;
+  public encryptedData?: string;
 
   constructor(
     socket: WebSocket,
@@ -34,7 +34,7 @@ export class User {
     this.id = randomUUID();
     this.displayName = displayName;
     this.lastActiveAt = Date.now();
-    this.color = this.generateColor()
+    this.color = this.generateColor();
     this.presence = {
       cursor: {
         x: initialPresence?.cursor?.x ?? 0,
@@ -55,25 +55,25 @@ export class User {
 
 export class CollaborationManager {
   private rooms: Map<string, User[]>; // roomId --> User[]
-  private users:User[]
-  private pendingId:string | null = null;
-  constructor(){
-    this.rooms = new Map()
-    this.users = []
+  private users: User[];
+  private pendingId: string | null = null;
+  constructor() {
+    this.rooms = new Map();
+    this.users = [];
   }
-   /**
+  /**
    * Adds a user to a users Array.
    * @param user
    */
   addUser(user: User) {
     this.users.push(user);
-    this.addHandler(user)
+    this.addHandler(user);
   }
 
   removeUser(userId: string) {
     for (const [roomId, users] of this.rooms.entries()) {
-      const updatedUsers = users.filter(u => u.id !== userId);
-      
+      const updatedUsers = users.filter((u) => u.id !== userId);
+
       if (updatedUsers.length === 0) {
         this.rooms.delete(roomId);
       } else {
@@ -89,67 +89,93 @@ export class CollaborationManager {
   updateUserPresence(userId: string, presence: Partial<UserPresence>) {
     // Update user presence in all rooms they're in
     for (const users of this.rooms.values()) {
-      const user = users.find(u => u.id === userId);
+      const user = users.find((u) => u.id === userId);
       if (user) {
         user.updatePresence(presence);
       }
     }
   }
 
-  broadcastToRoom(roomId: string, message: any, excludeUserId?: string) {
-    const users = this.rooms.get(roomId) || [];
-    console.log(users,excludeUserId)
+  broadcastToRoom(message: any, excludeUserId?: string,roomId?: string) {
+    let currentRoomId = roomId || null;
+    if (!currentRoomId) {
+      for (const [key, value] of this.rooms.entries()) {
+        if (value.find((user) => user.id === excludeUserId)) {
+          currentRoomId = key;
+          break;
+        }
+      }
+    }
+    if (!currentRoomId) return;
+    const users = this.rooms.get(currentRoomId) || [];
+    console.log(users, excludeUserId);
     for (const user of users) {
       if (excludeUserId && user.id === excludeUserId) continue;
       user.socket.send(message);
-    } 
+    }
   }
   private addHandler(user: User) {
     user.socket.on("message", async (data) => {
-        const message = JSON.parse(data.toString()) as ClientMessage;
-        if (message.type === EventTypes.CREATE_ROOM) {
-            const {roomId}:{roomId:string} = message.payload
-            this.rooms.set(roomId,[user])
-            user.socket.send(JSON.stringify({ type: EventTypes.ROOM_CREATED, roomId })); 
-        } else if (message.type === EventTypes.JOIN_ROOM) {
-            const { roomId }:{roomId:string} = message.payload;
-            if(this.rooms.has(roomId)){
-              this.rooms.get(roomId)?.push(user)
-              user.socket.send(JSON.stringify({ type: EventTypes.JOINED_ROOM, roomId })); 
-              this.broadcastToRoom(roomId,JSON.stringify({type:EventTypes.USER_JOINED,message:`${user.email} has joined`}),user.id)
-            } else {
-              user.socket.send(JSON.stringify({type:EventTypes.ERROR,message: "Room does not exist." }))
-            }
-        } else if (message.type === EventTypes.CURSOR_MOVE) {
-          const { roomId, cursor } = message.payload;
-      
-          this.updateUserPresence(user.id, { cursor });
-      
-          this.broadcastToRoom(
-              roomId,
-              JSON.stringify({
-                  type: EventTypes.CURSOR_MOVED,
-                  userId: user.id,
-                  cursor,
-                  color:user.color,
-                  displayName:user.displayName
-              }),
-              user.id 
-          );
-        } else if (message.type === EventTypes.SEND_ENCRYPTED_DATA) {
-          const { roomId, encryptedData } = message.payload;
-            
-          this.broadcastToRoom(
-            roomId,
-            JSON.stringify({
-                type: EventTypes.RECEIVE_ENCRYPTED_DATA,
-                userId: user.id,
-                encryptedData,
-            }),
-            user.id 
+      const message = JSON.parse(data.toString()) as ClientMessage;
+      if (message.type === EventTypes.CREATE_ROOM) {
+        const { roomId }: { roomId: string } = message.payload;
+        this.rooms.set(roomId, [user]);
+        user.socket.send(
+          JSON.stringify({ type: EventTypes.ROOM_CREATED, roomId })
         );
+      } else if (message.type === EventTypes.JOIN_ROOM) {
+        const { roomId }: { roomId: string } = message.payload;
+        if (this.rooms.has(roomId)) {
+          this.rooms.get(roomId)?.push(user);
+          user.socket.send(
+            JSON.stringify({ type: EventTypes.JOINED_ROOM, roomId })
+          );
+          this.broadcastToRoom(
+            
+            JSON.stringify({
+              type: EventTypes.USER_JOINED,
+              message: `${user.email} has joined`,
+            }),
+            user.id,
+            roomId,
+          );
+        } else {
+          user.socket.send(
+            JSON.stringify({
+              type: EventTypes.ERROR,
+              message: "Room does not exist.",
+            })
+          );
         }
+      } else if (message.type === EventTypes.CURSOR_MOVE) {
+        const { roomId, cursor } = message.payload;
 
+        this.updateUserPresence(user.id, { cursor });
+
+        this.broadcastToRoom(
+          JSON.stringify({
+            type: EventTypes.CURSOR_MOVED,
+            userId: user.id,
+            cursor,
+            color: user.color,
+            displayName: user.displayName,
+          }),
+          user.id,
+          roomId,
+        );
+      } else if (message.type === EventTypes.SEND_ENCRYPTED_DATA) {
+        const { roomId, encryptedData } = message.payload;
+
+        this.broadcastToRoom(
+          JSON.stringify({
+            type: EventTypes.RECEIVE_ENCRYPTED_DATA,
+            userId: user.id,
+            encryptedData,
+          }),
+          user.id,
+          roomId,
+        );
+      }
     });
   }
 }
