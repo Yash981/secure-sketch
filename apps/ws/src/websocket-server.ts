@@ -26,8 +26,8 @@ wss.on("connection", function connection(ws: WebSocket, req) {
   ws.on("close", (event) => {
     console.log(event, "event");
     console.log("Client disconnected");
-    collobrationManager.broadcastToRoom(JSON.stringify({ type: "USER_LEFT", payload: { userId: user.id } }), user.id);
-    collobrationManager.removeUser(user.id)
+    collobrationManager.broadcastToRoom(JSON.stringify({ type: "USER_LEFT", payload: { userId: user.email } }), user.email);
+    collobrationManager.removeUser(user.email)
   });
   ws.on("error", (err) => {
     console.error(err);

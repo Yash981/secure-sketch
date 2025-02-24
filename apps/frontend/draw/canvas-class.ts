@@ -1,4 +1,5 @@
 "use client";
+import { EventTypes } from "@repo/backend-common";
 import { Rect, Canvas, Circle, Line, PencilBrush, IText } from "fabric";
 export type Shape =
   | "circle"
@@ -22,6 +23,8 @@ export class CanvasGame {
   private lastPanY: number;
   private viewportTransform: number[] | null;
   private eraser: number;
+  private sendMessage?: (data: string) => void;
+
   constructor(
     canvas: Canvas,
     selectedTool: Shape,
@@ -29,7 +32,8 @@ export class CanvasGame {
     isFilled: boolean,
     opacity: number,
     strokeWidth: number,
-    color: string
+    color: string,
+    sendMessage?: (data: string) => void
   ) {
     this.canvas = canvas;
     this.selectedTool = selectedTool;
@@ -44,6 +48,7 @@ export class CanvasGame {
     this.viewportTransform = null;
     this.eraser = 10;
     this.initializeCanvasEvents();
+    this.sendMessage = sendMessage;
     
   }
   private initializeCanvasEvents() {
@@ -110,6 +115,7 @@ export class CanvasGame {
       isDrawing = false;
       this.saveCanvasState();
       this.setSelectedTool("select");
+      this.sendCanvasData();
     });
   };
   handleDrawCircle = () => {
@@ -514,4 +520,24 @@ export class CanvasGame {
       console.error("Error loading decrypted data:", error);
     }
   }
+
+  sendCanvasData(){
+      console.log("Canvas state changed, sending data...");
+      const data = this.getCurrentCanvasState();
+  
+      setTimeout(() => {
+        this.sendMessage?.(
+          JSON.stringify({
+            type: EventTypes.SEND_ENCRYPTED_DATA,
+            payload: {
+              roomId: window.location.pathname.split("/").pop(),
+              encryptedData: data, 
+            },
+          })
+        );
+      }, 100);
+      this.saveCanvasState();
+      this.canvas.renderAll();
+  };
+  
 }

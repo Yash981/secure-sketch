@@ -80,6 +80,7 @@ export class CollaborationManager {
         this.rooms.set(roomId, updatedUsers);
       }
     }
+    this.users = this.users.filter((u) => u.email !== userId);
   }
 
   getUsersInRoom(roomId: string): User[] {
@@ -89,7 +90,7 @@ export class CollaborationManager {
   updateUserPresence(userId: string, presence: Partial<UserPresence>) {
     // Update user presence in all rooms they're in
     for (const users of this.rooms.values()) {
-      const user = users.find((u) => u.id === userId);
+      const user = users.find((u) => u.email === userId);
       if (user) {
         user.updatePresence(presence);
       }
@@ -100,7 +101,7 @@ export class CollaborationManager {
     let currentRoomId = roomId || null;
     if (!currentRoomId) {
       for (const [key, value] of this.rooms.entries()) {
-        if (value.find((user) => user.id === excludeUserId)) {
+        if (value.find((user) => user.email === excludeUserId)) {
           currentRoomId = key;
           break;
         }
@@ -108,10 +109,8 @@ export class CollaborationManager {
     }
     if (!currentRoomId) return;
     const users = this.rooms.get(currentRoomId) || [];
-    console.log(users, excludeUserId);
     for (const user of users) {
-      if (excludeUserId && user.id === excludeUserId) continue;
-      user.socket.send(message);
+      if (excludeUserId && user.email !== excludeUserId) user.socket.send(message);
     }
   }
   private addHandler(user: User) {
@@ -123,22 +122,43 @@ export class CollaborationManager {
         user.socket.send(
           JSON.stringify({ type: EventTypes.ROOM_CREATED, roomId })
         );
-      } else if (message.type === EventTypes.JOIN_ROOM) {
+      }else if (message.type === EventTypes.JOIN_ROOM) {
         const { roomId }: { roomId: string } = message.payload;
+      
         if (this.rooms.has(roomId)) {
-          this.rooms.get(roomId)?.push(user);
+          const room = this.rooms.get(roomId) || [];
+      
+          console.log(room.length, "before length of room", room);
+      
+          // Check if the user already exists
+          const existingUserIndex = room.findIndex((u) => u.email === user.email);
+      
+          if (existingUserIndex !== -1) {
+            // Update existing user with new socket or data
+            room[existingUserIndex] = user;
+          } else {
+            // Add new user if not in room
+            room.push(user);
+          }
+      
+          // Update the room in the Map
+          this.rooms.set(roomId, room);
+      
+          console.log(this.rooms.get(roomId)?.length, "length of room");
+      
           user.socket.send(
             JSON.stringify({ type: EventTypes.JOINED_ROOM, roomId })
           );
+      
           this.broadcastToRoom(
-            
             JSON.stringify({
               type: EventTypes.USER_JOINED,
               message: `${user.email} has joined`,
             }),
             user.id,
-            roomId,
+            roomId
           );
+      
         } else {
           user.socket.send(
             JSON.stringify({
@@ -147,20 +167,21 @@ export class CollaborationManager {
             })
           );
         }
-      } else if (message.type === EventTypes.CURSOR_MOVE) {
+      }
+       else if (message.type === EventTypes.CURSOR_MOVE) {
         const { roomId, cursor } = message.payload;
 
-        this.updateUserPresence(user.id, { cursor });
+        this.updateUserPresence(user.email, { cursor });
 
         this.broadcastToRoom(
           JSON.stringify({
             type: EventTypes.CURSOR_MOVED,
-            userId: user.id,
+            userId: user.email,
             cursor,
             color: user.color,
             displayName: user.displayName,
           }),
-          user.id,
+          user.email,
           roomId,
         );
       } else if (message.type === EventTypes.SEND_ENCRYPTED_DATA) {
@@ -169,10 +190,10 @@ export class CollaborationManager {
         this.broadcastToRoom(
           JSON.stringify({
             type: EventTypes.RECEIVE_ENCRYPTED_DATA,
-            userId: user.id,
+            userId: user.email,
             encryptedData,
           }),
-          user.id,
+          user.email,
           roomId,
         );
       }

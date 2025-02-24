@@ -102,6 +102,7 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
     }
     //eslint-disable-next-line
   }, [dialogState.collaboration])
+  //collaboration
   useEffect(() => {
     if (decryptedData) {
       if (canvasGameRef.current) {
@@ -124,14 +125,14 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
           isFilled,
           opacity,
           strokeWidth,
-          color
+          color,
+          sendMessage
         );
 
         canvasGameRef.current = newCanvasGame;
-
+        
+        newCanvasGame.render();
         newCanvasGame.loadDecryptedData(decryptedData);
-
-        //send mouseMovement
         newCanvas.on("mouse:move", function (event) {
           if (!event.scenePoint) return;
           cursorPosition.current = {
@@ -140,14 +141,14 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
           }
         })
           const sendCursorUpdates = () =>{
-            if(cursorPosition.current && sendMessage){
-              sendMessage(JSON.stringify({
-                type: EventTypes.CURSOR_MOVE,
-                payload: {
+            if(cursorPosition.current){
+                sendMessage?.(JSON.stringify({
+                  type: EventTypes.CURSOR_MOVE,
+                  payload: {
                   roomId: window.location.pathname.split("/").pop(),
                   cursor: cursorPosition.current,
-                }
-              }))
+                  }
+                }));
               cursorPosition.current = null;
             }
           }
@@ -164,7 +165,7 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
       }
     }
     //eslint-disable-next-line
-  }, [decryptedData]);
+  }, [decryptedData,selectedTool]);
 
   useEffect(() => {
     if (!canvasGameRef.current || !lastMessage) return;
@@ -173,7 +174,7 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
       const { userId, cursor, color, displayName } = lastMessage;
       const { x, y } = cursor;
 
-      let currentCursor = canvas.getObjects().find((obj: any) => obj.id === userId);
+      let currentCursor = canvas.getObjects().find((obj: any) => obj.email === userId);
 
       if (!currentCursor) {
         const arrow = new Triangle({
@@ -231,7 +232,7 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
           evented: false,
 
         });
-        currentCursor.set("id", userId);
+        currentCursor.set("email", userId);
         canvas.add(currentCursor);
       } else {
         currentCursor.set({ left: x, top: y });
@@ -246,15 +247,21 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
       }
 
       canvas.requestRenderAll();
-    } else if (lastMessage.type === EventTypes.USER_LEFT) {
+    }
+    if (lastMessage.type === EventTypes.USER_LEFT) {
       // console.log('going to remove cursor')
       const { userId } = lastMessage.payload;
-      const cursorToRemove = canvas.getObjects().find((obj: any) => obj.id === userId);
+      const cursorToRemove = canvas.getObjects().find((obj: any) => obj.email === userId);
       
       if (cursorToRemove) {
         canvas.remove(cursorToRemove);
         canvas.requestRenderAll();
       }
+    }
+    if(lastMessage.type === EventTypes.RECEIVE_ENCRYPTED_DATA){
+      const { encryptedData } = lastMessage
+      canvasGameRef.current.loadDecryptedData(encryptedData)
+      canvasGameRef.current.canvas.requestRenderAll();
     }
   }, [lastMessage]);
 
