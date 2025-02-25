@@ -67,7 +67,7 @@ export class CanvasGame {
   }
   public handleObjectModified = () => {
     this.saveCanvasState();
-    this.canvas.renderAll();
+    this.canvas.requestRenderAll();
   };
 
   handleDrawRectangle = () => {
@@ -108,7 +108,7 @@ export class CanvasGame {
       if (pointer.y < startY) {
         rect.set({ top: pointer.y });
       }
-      this.canvas.renderAll();
+      this.canvas.requestRenderAll();
     });
 
     this.canvas.on("mouse:up", () => {
@@ -162,7 +162,7 @@ export class CanvasGame {
         top: startY - radius,
       });
 
-      this.canvas.renderAll();
+      this.canvas.requestRenderAll();
     });
 
     this.canvas.on("mouse:up", () => {
@@ -197,7 +197,7 @@ export class CanvasGame {
       if (!isDrawing) return;
       const pointer = this.canvas.getScenePoint(event.e);
       line.set({ x2: pointer.x, y2: pointer.y });
-      this.canvas.renderAll();
+      this.canvas.requestRenderAll();
     });
     this.canvas.on("mouse:up", () => {
       isDrawing = false;
@@ -344,33 +344,57 @@ export class CanvasGame {
 
   saveCanvasState() {
     if (!this.canvas) return;
-    localStorage.setItem(
-      "canvas",
-      JSON.stringify({
-        canvas: this.canvas.toJSON(),
-        viewportTransform: this.canvas.viewportTransform,
-      })
-    );
-  }
-  getCurrentCanvasState() {
-    return JSON.stringify({
+    const cursorObject = this.canvas
+      .getObjects()
+      .find((obj) => obj.get("email"));
+    if(cursorObject){
+      this.canvas.remove(cursorObject);
+    }
+    const canvasData = JSON.stringify({
       canvas: this.canvas.toJSON(),
       viewportTransform: this.canvas.viewportTransform,
     });
+    localStorage.setItem(
+      "canvas",
+      canvasData
+    );
+    if(cursorObject){
+      this.canvas.add(cursorObject);
+    }
+  }
+  getCurrentCanvasState() {
+    const cursorObject = this.canvas
+      .getObjects()
+      .find((obj) => obj.get("email"));
+
+    if (cursorObject) {
+      this.canvas.remove(cursorObject);
+    }
+
+    const canvasData = JSON.stringify({
+      canvas: this.canvas.toJSON(),
+      viewportTransform: this.canvas.viewportTransform,
+    });
+
+    if (cursorObject) {
+      this.canvas.add(cursorObject);
+    }
+
+    return canvasData;
   }
   loadCanvasState() {
     const savedState = localStorage.getItem("canvas");
-    if(!savedState){
-      return 
+    if (!savedState) {
+      return;
     }
     if (JSON.parse(savedState).canvas.objects.length > 0) {
-        const { canvas, viewportTransform } = JSON.parse(savedState);
-        this.canvas.loadFromJSON(canvas, () => {
-          if (viewportTransform) {
-            this.canvas.setViewportTransform(viewportTransform);
-          }
-          this.canvas.requestRenderAll();
-        });
+      const { canvas, viewportTransform } = JSON.parse(savedState);
+      this.canvas.loadFromJSON(canvas, () => {
+        if (viewportTransform) {
+          this.canvas.setViewportTransform(viewportTransform);
+        }
+        this.canvas.requestRenderAll();
+      });
     }
   }
   clearCanvas() {
@@ -382,7 +406,7 @@ export class CanvasGame {
     if (activeObject) {
       this.canvas.remove(activeObject);
       this.saveCanvasState();
-      this.canvas.renderAll();
+      this.canvas.requestRenderAll();
     }
   }
   zoomCanvas(zoomLevel: number) {
@@ -396,7 +420,7 @@ export class CanvasGame {
       this.canvas.setViewportTransform(newTransform);
     }
 
-    this.canvas.renderAll();
+    this.canvas.requestRenderAll();
     setTimeout(() => {
       this.saveCanvasState();
     }, 500);
@@ -493,10 +517,7 @@ export class CanvasGame {
 
   loadDecryptedData(data: string) {
     try {
-      if (
-        !this.canvas ||
-        !this.canvas.lowerCanvasEl
-      ) {
+      if (!this.canvas || !this.canvas.lowerCanvasEl) {
         console.warn("Canvas was removed before loading state.");
         return;
       }
@@ -506,38 +527,37 @@ export class CanvasGame {
         console.error("Invalid canvas data");
         return;
       }
-
-        this.canvas.loadFromJSON(parsedData.canvas, () => {  
-          this.canvas.requestRenderAll();
-          console.log("Decrypted data loaded successfully");
-        });
+      this.canvas.clear();
+      this.canvas.loadFromJSON(parsedData.canvas, () => {
+        this.canvas.requestRenderAll();
+        console.log("Decrypted data loaded successfully");
+      });
 
       if (parsedData.viewportTransform) {
-        this.canvas.viewportTransform = parsedData.viewportTransform;
+        this.canvas.setViewportTransform(parsedData.viewportTransform);
         this.canvas.requestRenderAll();
       }
+      this.canvas.requestRenderAll();
+      console.log('decrpyted data ',this.canvas.getObjects());
     } catch (error) {
       console.error("Error loading decrypted data:", error);
     }
   }
 
-  sendCanvasData(){
-      console.log("Canvas state changed, sending data...");
-      const data = this.getCurrentCanvasState();
-  
-      setTimeout(() => {
-        this.sendMessage?.(
-          JSON.stringify({
-            type: EventTypes.SEND_ENCRYPTED_DATA,
-            payload: {
-              roomId: window.location.pathname.split("/").pop(),
-              encryptedData: data, 
-            },
-          })
-        );
-      }, 100);
-      this.saveCanvasState();
-      this.canvas.renderAll();
-  };
-  
+  sendCanvasData() {
+    console.log("Canvas state changed, sending data...");
+    const data = this.getCurrentCanvasState();
+    setTimeout(() => {
+      this.sendMessage?.(
+        JSON.stringify({
+          type: EventTypes.SEND_ENCRYPTED_DATA,
+          payload: {
+            roomId: window.location.pathname.split("/").pop(),
+            encryptedData: data,
+          },
+        })
+      );
+      console.log("Data sent successfully",this.canvas);
+    }, 100);
+  }
 }

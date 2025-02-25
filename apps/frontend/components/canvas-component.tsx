@@ -130,9 +130,8 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
         );
 
         canvasGameRef.current = newCanvasGame;
-        
-        newCanvasGame.render();
         newCanvasGame.loadDecryptedData(decryptedData);
+        newCanvasGame.render();
         newCanvas.on("mouse:move", function (event) {
           if (!event.scenePoint) return;
           cursorPosition.current = {
@@ -249,7 +248,6 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
       canvas.requestRenderAll();
     }
     if (lastMessage.type === EventTypes.USER_LEFT) {
-      // console.log('going to remove cursor')
       const { userId } = lastMessage.payload;
       const cursorToRemove = canvas.getObjects().find((obj: any) => obj.email === userId);
       
@@ -264,8 +262,6 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
       canvasGameRef.current.canvas.requestRenderAll();
     }
   }, [lastMessage]);
-
-
 
   return (
     <div style={{
