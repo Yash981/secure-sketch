@@ -169,6 +169,8 @@ export class CanvasGame {
       isDrawing = false;
       this.saveCanvasState();
       this.setSelectedTool("select");
+      this.sendCanvasData();
+
     });
   };
   handleDrawLine = () => {
@@ -203,6 +205,8 @@ export class CanvasGame {
       isDrawing = false;
       this.saveCanvasState();
       this.setSelectedTool("select");
+      this.sendCanvasData();
+
     });
   };
   handleDrawPencil = () => {
@@ -214,6 +218,7 @@ export class CanvasGame {
     this.canvas.isDrawingMode = true;
     this.canvas.on("mouse:up", () => {
       this.saveCanvasState();
+      this.sendCanvasData();
     });
   };
   handleDrawEraser = () => {
@@ -267,6 +272,7 @@ export class CanvasGame {
       if (canvasContainer && canvasContainer.contains(cursorDot)) {
         canvasContainer.removeChild(cursorDot);
       }
+      this.sendCanvasData();
       this.canvas.off("mouse:move", eraseObjects);
       this.canvas.off("mouse:down", mouseDownHandler);
       this.canvas.off("mouse:up", mouseUpHandler);
@@ -297,6 +303,8 @@ export class CanvasGame {
       text.on("editing:exited", () => {
         this.canvas.defaultCursor = "default";
         this.setSelectedTool("select");
+        this.sendCanvasData();
+
       });
       this.canvas.off("mouse:down", textMouseDownHandler);
     };
@@ -538,6 +546,9 @@ export class CanvasGame {
         this.canvas.requestRenderAll();
       }
       this.canvas.requestRenderAll();
+      setTimeout(() => {
+        this.saveCanvasState()
+      }, 1000);
       console.log('decrpyted data ',this.canvas.getObjects());
     } catch (error) {
       console.error("Error loading decrypted data:", error);
