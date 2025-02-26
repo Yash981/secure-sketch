@@ -61,10 +61,6 @@ export class CollaborationManager {
     this.rooms = new Map();
     this.users = [];
   }
-  /**
-   * Adds a user to a users Array.
-   * @param user
-   */
   addUser(user: User) {
     this.users.push(user);
     this.addHandler(user);
@@ -88,7 +84,6 @@ export class CollaborationManager {
   }
 
   updateUserPresence(userId: string, presence: Partial<UserPresence>) {
-    // Update user presence in all rooms they're in
     for (const users of this.rooms.values()) {
       const user = users.find((u) => u.email === userId);
       if (user) {
@@ -98,6 +93,7 @@ export class CollaborationManager {
   }
 
   broadcastToRoom(message: any, excludeUserId?: string,roomId?: string) {
+    console.log('broadcasting to room', message, excludeUserId, roomId);
     let currentRoomId = roomId || null;
     if (!currentRoomId) {
       for (const [key, value] of this.rooms.entries()) {
@@ -109,8 +105,12 @@ export class CollaborationManager {
     }
     if (!currentRoomId) return;
     const users = this.rooms.get(currentRoomId) || [];
+    console.log(users, 'users');
     for (const user of users) {
-      if (excludeUserId && user.email !== excludeUserId) user.socket.send(message);
+      if (excludeUserId && user.email !== excludeUserId) {
+        console.log('sending message to user', user.email);
+        user.socket.send(message);
+      }
     }
   }
   private addHandler(user: User) {
@@ -130,18 +130,14 @@ export class CollaborationManager {
       
           console.log(room.length, "before length of room", room);
       
-          // Check if the user already exists
           const existingUserIndex = room.findIndex((u) => u.email === user.email);
       
           if (existingUserIndex !== -1) {
-            // Update existing user with new socket or data
             room[existingUserIndex] = user;
           } else {
-            // Add new user if not in room
             room.push(user);
           }
       
-          // Update the room in the Map
           this.rooms.set(roomId, room);
       
           console.log(this.rooms.get(roomId)?.length, "length of room");
@@ -186,7 +182,7 @@ export class CollaborationManager {
         );
       } else if (message.type === EventTypes.SEND_ENCRYPTED_DATA) {
         const { roomId, encryptedData } = message.payload;
-
+        console.log(encryptedData,'encryptedData on server');
         this.broadcastToRoom(
           JSON.stringify({
             type: EventTypes.RECEIVE_ENCRYPTED_DATA,

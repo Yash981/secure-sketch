@@ -21,7 +21,6 @@ export const DrawingControls = () => {
 
   return (
     <div className="flex flex-col md:flex-row items-start md:items-center gap-6 p-6 bg-white border border-gray-100 rounded-2xl shadow-xl backdrop-blur-sm bg-opacity-95">
-      {/* Color Picker */}
       <div className="space-y-2 flex flex-col items-start">
         <Label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Color</Label>
         <Popover>
@@ -63,7 +62,6 @@ export const DrawingControls = () => {
         <div className="text-xs text-gray-500 text-right">{strokeWidth}px</div>
       </div>
 
-      {/* Opacity Slider */}
       <div className="space-y-2 min-w-[160px]">
         <Label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Opacity</Label>
         <Slider
@@ -77,7 +75,6 @@ export const DrawingControls = () => {
         <div className="text-xs text-gray-500 text-right">{Math.round(opacity * 100)}%</div>
       </div>
 
-      {/* Style Toggle */}
       <div className="space-y-2 flex flex-col items-start">
         <Label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Style</Label>
         <button

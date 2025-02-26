@@ -1,9 +1,10 @@
 "use client";
-import { Canvas, Group, Rect, Text, Triangle } from 'fabric';
+import { Canvas, Group, Path, Rect, Shadow, Text } from 'fabric';
 import React, { useEffect, useRef, useState } from 'react';
 import { useUIstore, useZoomStore } from '@/stores';
-import { CanvasGame } from '@/draw/canvas-class';  // Adjust import path as needed
+import { CanvasGame } from '@/draw/canvas-class';
 import { EventTypes } from '@repo/backend-common';
+import { TosendEncyptedDataViaWebsocket, arrayBufferToBase64 } from '@/lib/E2EE';
 
 const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decryptedData?: string, sendMessage?: (data: string) => void, lastMessage?: any | null }) => {
   const { selectedTool, setSelectedTool, isFilled, opacity, strokeWidth, color, clearCanvas, setClearCanvas, dialogState, setCanvasData } = useUIstore();
@@ -40,7 +41,6 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
 
 
     return () => {
-      console.log("Cleaning up canvas before disposing...");
 
       if (canvasGameRef.current?.canvas) {
         canvasGameRef.current.canvas.clear();
@@ -126,7 +126,9 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
           opacity,
           strokeWidth,
           color,
-          sendMessage
+          sendMessage,
+          TosendEncyptedDataViaWebsocket,
+          arrayBufferToBase64
         );
 
         canvasGameRef.current = newCanvasGame;
@@ -139,19 +141,19 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
             y: event.scenePoint.y,
           }
         })
-          const sendCursorUpdates = () =>{
-            if(cursorPosition.current){
-                sendMessage?.(JSON.stringify({
-                  type: EventTypes.CURSOR_MOVE,
-                  payload: {
-                  roomId: window.location.pathname.split("/").pop(),
-                  cursor: cursorPosition.current,
-                  }
-                }));
-              cursorPosition.current = null;
-            }
+        const sendCursorUpdates = () => {
+          if (cursorPosition.current) {
+            sendMessage?.(JSON.stringify({
+              type: EventTypes.CURSOR_MOVE,
+              payload: {
+                roomId: window.location.pathname.split("/").pop(),
+                cursor: cursorPosition.current,
+              }
+            }));
+            cursorPosition.current = null;
           }
-        const intervalId = setInterval(sendCursorUpdates,100)
+        }
+        const intervalId = setInterval(sendCursorUpdates, 100)
         return () => {
           newCanvas.off("mouse:move");
           clearInterval(intervalId);
@@ -164,105 +166,116 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
       }
     }
     //eslint-disable-next-line
-  }, [decryptedData,selectedTool]);
+  }, [decryptedData, selectedTool]);
 
+ 
   useEffect(() => {
     if (!canvasGameRef.current || !lastMessage) return;
     const canvas = canvasGameRef.current.canvas;
+  
     if (lastMessage.type === EventTypes.CURSOR_MOVED) {
       const { userId, cursor, color, displayName } = lastMessage;
       const { x, y } = cursor;
-
+    
       let currentCursor = canvas.getObjects().find((obj: any) => obj.email === userId);
-
+    
       if (!currentCursor) {
-        const arrow = new Triangle({
-          width: 20,
-          height: 20,
+        const cursorArrow = new Path('M0,0 L0,18 L12,12 Z', {
           fill: color,
           selectable: false,
           evented: false,
-          originX: "center",
-          originY: "bottom",
+          originX: 'left',
+          originY: 'top',
+          angle: 0,
+          top:-8,
+          shadow: new Shadow({
+            color: 'rgba(0,0,0,0.2)',
+            offsetX: 1,
+            offsetY: 1,
+            blur: 2
+          })
         });
-        const textWidth = displayName.length * 8; 
-        const textHeight = 20; 
-
-        const bgRect = new Rect({
+    
+        const textWidth = displayName.length * 8 + 16;
+        const textHeight = 22;
+    
+        const nameBackground = new Rect({
           width: textWidth,
           height: textHeight,
-          fill: color,
-          rx: 2,
-          ry: 2, 
-          originX: "center",
-          originY: "top",
+          fill: 'white',
+          stroke: color,
+          strokeWidth: 1.5,
+          rx: 10,
+          ry: 10,
+          originX: 'left',
+          originY: 'top',
           selectable: false,
           evented: false,
-          borderColor: 'black',
-          strokeWidth: 1,
-
+          left: 12, 
+          top: 0  
         });
+    
         const nameText = new Text(displayName, {
           fontSize: 13,
-          fill: 'black',
-          textBackgroundColor: color,
+          fill: '#333333',
           selectable: false,
           evented: false,
-          originX: "center",
-          originY: "top",
+          originX: 'center',
+          originY: 'center',
           fontFamily: 'Arial',
-          fontWeight: 400,
-          fontStyle: 'normal',
-          textAlign: 'center',
-          top: 4,
+          fontWeight: 'normal',
+          left: nameBackground.left + textWidth / 2,
+          top: nameBackground.top + textHeight / 2
         });
-        const nameLabel = new Group([bgRect, nameText], {
-          originX: "center",
-          originY: "top",
-          selectable: false,
-          evented: false,
-          top:5,
-          left:0,
-        });
-        currentCursor = new Group([arrow, nameLabel], {
+    
+        currentCursor = new Group([cursorArrow, nameBackground, nameText], {
           left: x,
           top: y,
           selectable: false,
           evented: false,
-
         });
+    
         currentCursor.set("email", userId);
         canvas.add(currentCursor);
       } else {
         currentCursor.set({ left: x, top: y });
+        
         const objects = currentCursor.group?.getObjects();
-        if (objects && objects.length >= 2) {
-          const [arrow, nameLabel] = objects;
-          console.log(nameLabel, "nameLabel",color,'color');
-          arrow.set({ fill: color });
-          nameLabel.set({ fill:color,textBackgroundColor: color, text: displayName });
+        if (objects && objects.length >= 3) {
+          const [cursorArrow, nameBackground, nameText] = objects;
+          
+          cursorArrow.set({ fill: color });
+          nameBackground.set({ stroke: color });
+          nameText.set({ text: displayName });
         }
+        
         currentCursor.setCoords();
       }
-
+    
       canvas.requestRenderAll();
     }
+    
     if (lastMessage.type === EventTypes.USER_LEFT) {
+      console.log('user left')
+
       const { userId } = lastMessage.payload;
+      console.log(canvas.getObjects(), 'objects',userId)
       const cursorToRemove = canvas.getObjects().find((obj: any) => obj.email === userId);
-      
+  
       if (cursorToRemove) {
+        console.log('going to remove')
         canvas.remove(cursorToRemove);
         canvas.requestRenderAll();
       }
     }
-    if(lastMessage.type === EventTypes.RECEIVE_ENCRYPTED_DATA){
-      const { encryptedData } = lastMessage
-      canvasGameRef.current.loadDecryptedData(encryptedData)
-      canvasGameRef.current.canvas.requestRenderAll();
+    
+    if (lastMessage.type === EventTypes.RECEIVE_ENCRYPTED_DATA) {
+      const { encryptedData }: { encryptedData: string } = lastMessage;
+      canvasGameRef.current?.loadDecryptedData(encryptedData);
+      canvasGameRef.current?.canvas.requestRenderAll();
     }
   }, [lastMessage]);
-
+  
   return (
     <div style={{
       width: '100vw',

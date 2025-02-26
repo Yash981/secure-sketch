@@ -107,3 +107,36 @@ export const downloadEncryptedDataOnClient = async (url:string) =>{
   const decryptedMessage = await decryptMessage(extractedKey,downloadData);
   return decryptedMessage
 }
+export const TosendEncyptedDataViaWebsocket = async (data:string) =>{
+  console.log('it came here')
+  const key = await generateKey();
+  const encryptedData = await encryptMessage(key,data)
+  return encryptedData
+}
+export const ToDecryptEncryptedDataViaWebsocket = async (encryptedData:ArrayBuffer) =>{
+  const extractedKey = await ExtractKeyFromURL();
+  if(!extractedKey){
+    console.error('Invalid or missing key in URL!');
+    return;
+  }
+  const decryptedMessage = await decryptMessage(extractedKey,encryptedData);
+  return decryptedMessage
+}
+export const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
+  let binary = "";
+  const bytes = new Uint8Array(buffer);
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+export const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
+  const binaryString = atob(base64);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes.buffer;
+}

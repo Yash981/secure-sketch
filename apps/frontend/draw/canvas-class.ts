@@ -24,6 +24,8 @@ export class CanvasGame {
   private viewportTransform: number[] | null;
   private eraser: number;
   private sendMessage?: (data: string) => void;
+  private TosendEncyptedDataViaWebsocket?:(data: string) => Promise<ArrayBuffer>
+  private arrayBufferToBase64?: (buffer: ArrayBuffer) => string
 
   constructor(
     canvas: Canvas,
@@ -33,7 +35,9 @@ export class CanvasGame {
     opacity: number,
     strokeWidth: number,
     color: string,
-    sendMessage?: (data: string) => void
+    sendMessage?: (data: string) => void,
+    TosendEncyptedDataViaWebsocket?:(data: string) => Promise<ArrayBuffer>,
+    arrayBufferToBase64?: (buffer: ArrayBuffer) => string
   ) {
     this.canvas = canvas;
     this.selectedTool = selectedTool;
@@ -49,6 +53,8 @@ export class CanvasGame {
     this.eraser = 10;
     this.initializeCanvasEvents();
     this.sendMessage = sendMessage;
+    this.TosendEncyptedDataViaWebsocket = TosendEncyptedDataViaWebsocket;
+    this.arrayBufferToBase64 = arrayBufferToBase64;
     
   }
   private initializeCanvasEvents() {
@@ -557,18 +563,27 @@ export class CanvasGame {
 
   sendCanvasData() {
     console.log("Canvas state changed, sending data...");
+  
     const data = this.getCurrentCanvasState();
-    setTimeout(() => {
-      this.sendMessage?.(
-        JSON.stringify({
-          type: EventTypes.SEND_ENCRYPTED_DATA,
-          payload: {
-            roomId: window.location.pathname.split("/").pop(),
-            encryptedData: data,
-          },
-        })
-      );
-      console.log("Data sent successfully",this.canvas);
-    }, 100);
+    const roomId = window.location.pathname.split("/").pop();
+  
+    try {
+      // const encryptedData = await this.TosendEncyptedDataViaWebsocket?.(data);
+      // if(!encryptedData) return;
+      // const base64Data = this.arrayBufferToBase64?.(encryptedData);
+  
+      if (this.sendMessage) {
+        this.sendMessage(
+          JSON.stringify({
+            type: EventTypes.SEND_ENCRYPTED_DATA,
+            payload: { roomId, encryptedData:data },
+          })
+        );
+        console.log("Data sent successfully", this.canvas);
+      }
+    } catch (error) {
+      console.error("Error encrypting or sending data:", error);
+    }
   }
+  
 }
