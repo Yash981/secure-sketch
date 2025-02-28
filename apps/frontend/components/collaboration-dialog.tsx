@@ -15,7 +15,7 @@ import { Check, Circle, Copy, Loader2, Play } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useWebsocket } from "@/hooks/web-socket-hook"
 import { EventTypes } from "@repo/backend-common"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 
 export function CollaborationDialog() {
     const { dialogState, setDialogState,canvasData } = useUIstore()
@@ -25,6 +25,7 @@ export function CollaborationDialog() {
     const [,setError] = useState('')
     const router = useRouter()
     const [copied,setCopied] = useState(false)
+    const pathname = usePathname()
     const token = typeof window !== 'undefined' ? localStorage.getItem('excaliWsToken'): null;
     const { sendMessage, connect,disconnect,ws } = useWebsocket(token);
     const handleStartSession = async () =>{
@@ -42,7 +43,7 @@ export function CollaborationDialog() {
                 if(ws.current && ws.current.readyState === WebSocket.OPEN){
                     sendMessage(JSON.stringify({ type: EventTypes.CREATE_ROOM,payload:{roomId:new URL(url).pathname.split('/').pop() }}));
                     console.log("Sent CREATE_ROOM after connecting.");
-                    // window.history.replaceState('', '', `/collaboration/${new URL(url).pathname.split('/')[2]}${new URL(url).hash}`);
+                    window.history.replaceState('', '', `/collaboration/${new URL(url).pathname.split('/')[2]}${new URL(url).hash}`);
                     
                 }
             }, 500);
@@ -73,7 +74,7 @@ export function CollaborationDialog() {
                         Don&apos;t worry, the session is end-to-end encrypted, and fully private.<br /> Not even our server can see what you draw.
                     </DialogDescription>
                 </DialogHeader>
-                {startSession && (
+                {(startSession || pathname.startsWith('/collaboration')) && (
                     <div className="flex gap-4 py-4  justify-center items-center px-6 flex-col">
                         <div className="w-full flex flex-col justify-start items-start gap-3">
                             <Label htmlFor="name" className="text-right">
@@ -86,7 +87,7 @@ export function CollaborationDialog() {
                                 <Label htmlFor="name" className="text-right">
                                     Your Link
                                 </Label>
-                                <Input id="name" value={currentUrl} className="w-full" readOnly />
+                                <Input id="name" value={currentUrl || window.location.href} className="w-full" readOnly />
                             </div>
                             <Button
                                 variant={"secondary"}
@@ -102,7 +103,7 @@ export function CollaborationDialog() {
                     </div>
                 )}
                 <DialogFooter className="sm:justify-center">
-                    {!startSession ? (
+                    {(!startSession && !pathname.startsWith('/collaboration'))  ? (
                         <Button type="button" onClick={handleStartSession}>
                             {loading ? <Loader2 className="animate-spin" /> : <Play />}
                             {loading ? 'Starting Session' : 'Start Session'}

@@ -8,6 +8,8 @@ import CanvasComponent from "@/components/canvas-component";
 import { TopBar } from "@/components/top-bar";
 import DrawingSelection from "@/components/drawing-selections";
 import ZoomCanvas from "@/components/zoom-canvas";
+import Collaboration from "@/components/collaboration";
+import { ClearDialog } from "@/components/clear-dialog";
 
 export default function CollaborationPage() {
   const { connect, sendMessage, lastMessage } = useWebsocket(typeof window !== 'undefined' ? localStorage.getItem('excaliWsToken') : null)
@@ -43,6 +45,10 @@ export default function CollaborationPage() {
   return (
     <div className="relative w-screen h-screen">
       <TopBar className="fixed top-3 left-1/2 transform -translate-x-1/2 z-10"/>
+      <div className="z-10 relative">
+        <Collaboration/>
+        </div>
+        <ClearDialog/>
       <CanvasComponent decryptedData={decryptedData} sendMessage={sendMessage} lastMessage={lastMessage} />
       <DrawingSelection/>
       <ZoomCanvas/>

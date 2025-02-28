@@ -73,8 +73,10 @@ export class CanvasGame {
   }
   public handleObjectModified = () => {
     this.saveCanvasState();
+    this.sendCanvasData()
     this.canvas.requestRenderAll();
   };
+  
 
   handleDrawRectangle = () => {
     this.cleanupEventListeners();
@@ -414,6 +416,9 @@ export class CanvasGame {
   clearCanvas() {
     this.canvas.clear();
     this.saveCanvasState();
+    setTimeout(() => {
+      this.sendCanvasData();
+    }, 1000);
   }
   deleteSelectedObject() {
     const activeObject = this.canvas.getActiveObject();
@@ -421,6 +426,7 @@ export class CanvasGame {
       this.canvas.remove(activeObject);
       this.saveCanvasState();
       this.canvas.requestRenderAll();
+      this.sendCanvasData();
     }
   }
   zoomCanvas(zoomLevel: number) {
@@ -528,8 +534,8 @@ export class CanvasGame {
       this.setSelectedTool("select");
     });
   }
-
-  loadDecryptedData(data: string) {
+  
+  async loadDecryptedData(data: string) {
     try {
       if (!this.canvas || !this.canvas.lowerCanvasEl) {
         console.warn("Canvas was removed before loading state.");
@@ -541,21 +547,22 @@ export class CanvasGame {
         console.error("Invalid canvas data");
         return;
       }
-      this.canvas.clear();
-      this.canvas.loadFromJSON(parsedData.canvas, () => {
-        this.canvas.requestRenderAll();
-        console.log("Decrypted data loaded successfully");
-      });
+      this.canvas.clear()
+      localStorage.removeItem('canvas')
+      await this.canvas.loadFromJSON(parsedData.canvas)
+    
 
       if (parsedData.viewportTransform) {
         this.canvas.setViewportTransform(parsedData.viewportTransform);
-        this.canvas.requestRenderAll();
       }
-      this.canvas.requestRenderAll();
-      setTimeout(() => {
-        this.saveCanvasState()
-      }, 1000);
-      console.log('decrpyted data ',this.canvas.getObjects());
+
+    this.canvas.requestRenderAll();
+
+    requestAnimationFrame(() => {
+      this.saveCanvasState();
+      console.log('Canvas state saved after full rendering');
+    });
+
     } catch (error) {
       console.error("Error loading decrypted data:", error);
     }
