@@ -24,8 +24,8 @@ export class CanvasGame {
   private viewportTransform: number[] | null;
   private eraser: number;
   private sendMessage?: (data: string) => void;
-  private TosendEncyptedDataViaWebsocket?:(data: string) => Promise<ArrayBuffer>
-  private arrayBufferToBase64?: (buffer: ArrayBuffer) => string
+  private getCryptoKeyFromStorage?:()=>Promise<CryptoKey | null>
+  private encryptMessage?:(key: CryptoKey, message: string) => Promise<ArrayBuffer>
 
   constructor(
     canvas: Canvas,
@@ -36,8 +36,8 @@ export class CanvasGame {
     strokeWidth: number,
     color: string,
     sendMessage?: (data: string) => void,
-    TosendEncyptedDataViaWebsocket?:(data: string) => Promise<ArrayBuffer>,
-    arrayBufferToBase64?: (buffer: ArrayBuffer) => string
+    getCryptoKeyFromStorage?:() => Promise<CryptoKey | null>,
+    encryptMessage?:(key: CryptoKey, message: string) => Promise<ArrayBuffer>
   ) {
     this.canvas = canvas;
     this.selectedTool = selectedTool;
@@ -53,8 +53,8 @@ export class CanvasGame {
     this.eraser = 10;
     this.initializeCanvasEvents();
     this.sendMessage = sendMessage;
-    this.TosendEncyptedDataViaWebsocket = TosendEncyptedDataViaWebsocket;
-    this.arrayBufferToBase64 = arrayBufferToBase64;
+    this.getCryptoKeyFromStorage = getCryptoKeyFromStorage
+    this.encryptMessage = encryptMessage
     
   }
   private initializeCanvasEvents() {
@@ -561,22 +561,24 @@ export class CanvasGame {
     }
   }
 
-  sendCanvasData() {
+  async sendCanvasData() {
     console.log("Canvas state changed, sending data...");
   
     const data = this.getCurrentCanvasState();
     const roomId = window.location.pathname.split("/").pop();
   
     try {
-      // const encryptedData = await this.TosendEncyptedDataViaWebsocket?.(data);
-      // if(!encryptedData) return;
-      // const base64Data = this.arrayBufferToBase64?.(encryptedData);
-  
+      if(!this.getCryptoKeyFromStorage) return;
+      const cryptoKey = await this.getCryptoKeyFromStorage()
+      if(!cryptoKey) return;
+      const encryptedData = await this.encryptMessage?.(cryptoKey,data);
+      if(!encryptedData) return;
+      const base64Data = btoa(String.fromCharCode(...new Uint8Array(encryptedData)));
       if (this.sendMessage) {
         this.sendMessage(
           JSON.stringify({
             type: EventTypes.SEND_ENCRYPTED_DATA,
-            payload: { roomId, encryptedData:data },
+            payload: { roomId, encryptedData:base64Data },
           })
         );
         console.log("Data sent successfully", this.canvas);

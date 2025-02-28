@@ -71,7 +71,7 @@ export const UserSignIn = async (req: Request, res: Response) => {
           : "SameSite=Lax"
       }`,
     ]);
-    res.status(200).json({ token });
+    res.status(200).json({ token,username:existingUser.email.split('@')[0] });
     return;
   } catch (error) {
     res.status(500).json({ mesage: "Internal Server Error", error });

@@ -56,7 +56,6 @@ export class User {
 export class CollaborationManager {
   private rooms: Map<string, User[]>; // roomId --> User[]
   private users: User[];
-  private pendingId: string | null = null;
   constructor() {
     this.rooms = new Map();
     this.users = [];

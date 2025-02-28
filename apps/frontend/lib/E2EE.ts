@@ -84,7 +84,7 @@ export async function ExtractKeyFromURL():Promise<CryptoKey | null> {
         kty:"oct"
     },{
         name:"AES-GCM",length:128
-    },false,["decrypt"])
+    },true,["encrypt","decrypt"])
     
 }
 
@@ -103,40 +103,35 @@ export const downloadEncryptedDataOnClient = async (url:string) =>{
     console.error('Invalid or missing key in URL!');
     return;
   }
+  const exportedKey = await window.crypto.subtle.exportKey("jwk", extractedKey);
+  sessionStorage.setItem('aes-key', JSON.stringify(exportedKey))
   const downloadData = await downloadEncryptedContent(urlObj.pathname.split('/')[2])
   const decryptedMessage = await decryptMessage(extractedKey,downloadData);
   return decryptedMessage
 }
-export const TosendEncyptedDataViaWebsocket = async (data:string) =>{
-  console.log('it came here')
-  const key = await generateKey();
-  const encryptedData = await encryptMessage(key,data)
-  return encryptedData
-}
-export const ToDecryptEncryptedDataViaWebsocket = async (encryptedData:ArrayBuffer) =>{
-  const extractedKey = await ExtractKeyFromURL();
-  if(!extractedKey){
-    console.error('Invalid or missing key in URL!');
-    return;
+export const getCryptoKeyFromStorage = async (): Promise<CryptoKey | null> => {
+  const keyString = sessionStorage.getItem("aes-key");
+  if (!keyString) {
+    console.error("No AES key found in sessionStorage!");
+    return null;
   }
-  const decryptedMessage = await decryptMessage(extractedKey,encryptedData);
-  return decryptedMessage
-}
-export const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
-  let binary = "";
-  const bytes = new Uint8Array(buffer);
-  const len = bytes.byteLength;
-  for (let i = 0; i < len; i++) {
-    binary += String.fromCharCode(bytes[i]);
+
+  try {
+    const jwkKey = JSON.parse(keyString); 
+    const cryptoKey = await window.crypto.subtle.importKey(
+      "jwk", {
+        k:jwkKey.k,
+        alg:"A128GCM",
+        ext:true,
+        key_ops:["encrypt","decrypt"],
+        kty:"oct"
+    },{
+        name:"AES-GCM",length:128
+    },true,["encrypt","decrypt"])
+
+    return cryptoKey; 
+  } catch (error) {
+    console.error("Failed to import AES key:", error);
+    return null;
   }
-  return btoa(binary);
-}
-export const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
-  const binaryString = atob(base64);
-  const len = binaryString.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
-  return bytes.buffer;
-}
+};

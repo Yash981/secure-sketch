@@ -39,6 +39,7 @@ export const AuthForm = () => {
                 console.log(response)
                 if(response && response.data.token){
                     localStorage.setItem('excaliWsToken',response.data.token)
+                    localStorage.setItem('excaliUsername',response.data.username)
                 }
                 router.push("/")
             } catch (error) {

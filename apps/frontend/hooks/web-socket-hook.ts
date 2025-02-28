@@ -13,8 +13,8 @@ export function useWebsocket(token: string | null) {
     }
 
     ws.current = new WebSocket(`ws://localhost:8080?token=${token}`);
-
-    ws.current.onopen = () => {
+    // ws.current.binaryType = "arraybuffer"
+    ws.current.onopen =  () => {
       setIsConnected(true);
       console.log("WebSocket connection opened.");
     };
@@ -50,7 +50,7 @@ export function useWebsocket(token: string | null) {
         console.warn("WebSocket is not connected.");
       }
     },
-    [isConnected]
+    []
   );
 
   return { connect, disconnect, sendMessage, lastMessage, isConnected,ws };

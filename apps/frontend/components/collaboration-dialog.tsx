@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label"
 import { useUIstore } from "@/stores"
 import { uploadEncryptedDataToServer } from "@/lib/E2EE"
 import { Check, Circle, Copy, Loader2, Play } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useWebsocket } from "@/hooks/web-socket-hook"
 import { EventTypes } from "@repo/backend-common"
 import { useRouter } from "next/navigation"
@@ -20,7 +20,6 @@ import { useRouter } from "next/navigation"
 export function CollaborationDialog() {
     const { dialogState, setDialogState,canvasData } = useUIstore()
     const [startSession, setStartSession] = useState(false)
-    const [inputValue,setInputValue] = useState('Yashwanth')
     const [currentUrl,setCurrentUrl] = useState('')
     const [loading,setLoading] = useState(false)
     const [,setError] = useState('')
@@ -44,8 +43,7 @@ export function CollaborationDialog() {
                     sendMessage(JSON.stringify({ type: EventTypes.CREATE_ROOM,payload:{roomId:new URL(url).pathname.split('/').pop() }}));
                     console.log("Sent CREATE_ROOM after connecting.");
                     // window.history.replaceState('', '', `/collaboration/${new URL(url).pathname.split('/')[2]}${new URL(url).hash}`);
-                    router.push(`/collaboration/${new URL(url).pathname.split('/')[2]}${new URL(url).hash}`)
-                    router.refresh()
+                    
                 }
             }, 500);
 
@@ -56,6 +54,13 @@ export function CollaborationDialog() {
             setLoading(false)
         }
     }
+    useEffect(()=>{
+        if(!dialogState.collaboration && startSession){
+            router.push(`/collaboration/${new URL(currentUrl).pathname.split('/')[2]}${new URL(currentUrl).hash}`)
+            router.refresh()
+        }
+        //eslint-disable-next-line
+    },[dialogState.collaboration])
     return (
         <Dialog open={dialogState.collaboration} onOpenChange={() => setDialogState("collaboration", !dialogState.collaboration)}>
             <DialogContent className="sm:max-w-[625px]">
@@ -74,7 +79,7 @@ export function CollaborationDialog() {
                             <Label htmlFor="name" className="text-right">
                                 Your Name
                             </Label>
-                            <Input id="name" type="text" value={inputValue}  className="w-full" onChange={(e)=>setInputValue(e.target.value)} />
+                            <Input id="name" type="text"   className="w-full" readOnly value={localStorage.getItem('excaliUsername') || 'User'}/>
                         </div>
                         <div className="flex justify-center items-end gap-3 w-full">
                             <div className="w-full flex flex-col justify-start items-start gap-3">
