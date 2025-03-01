@@ -12,8 +12,8 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasGameRef = useRef<CanvasGame | null>(null);
   const [dimensions, setDimensions] = useState<{ width: number; height: number }>({
-    width: window.innerWidth,
-    height: window.innerHeight
+    width: 1440,
+    height: 771
   });
   const cursorPosition = useRef<{ x: number; y: number } | null>(null);
   useEffect(() => {
@@ -67,6 +67,7 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
     };
   }, []);
   useEffect(() => {
+    if(typeof window === 'undefined') return;
     const handleResize = () => {
       const newWidth = window.innerWidth * 2;
       const newHeight = window.innerHeight * 2;
@@ -81,7 +82,7 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
         canvas.requestRenderAll();
       }
     };
-
+    handleResize()
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);

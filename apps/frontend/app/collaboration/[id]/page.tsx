@@ -37,6 +37,7 @@ export default function CollaborationPage() {
     };
 
     fetchAndDecrypt();
+    //eslint-disable-next-line
   }, []);
 
   if (error) return <h1>Error: {error}</h1>;
