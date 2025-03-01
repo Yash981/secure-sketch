@@ -15,7 +15,7 @@ app.use(cors({
   }))
 app.use('/api/v1',UserRouter) 
 
-
-app.listen(9000,()=>{
+const PORT = process.env.PORT || 9000
+app.listen(PORT,()=>{
     console.log('Server is running on http://localhost:9000')
 })

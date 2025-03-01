@@ -1,8 +1,8 @@
 import { WebSocket, WebSocketServer } from "ws";
 import { VerifyUser } from "@repo/backend-common";
 import { CollaborationManager, User } from "./managers/collaboration-manager";
-
-const wss = new WebSocketServer({ port: 8080 });
+const PORT = Number(process.env.PORT) || 8080; 
+const wss = new WebSocketServer({ port: PORT });
 console.log('WebSocket server starting on ws://localhost:8080'); 
 const collobrationManager = new CollaborationManager();
 wss.on('listening', () => {

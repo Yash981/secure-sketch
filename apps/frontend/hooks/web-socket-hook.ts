@@ -12,7 +12,7 @@ export function useWebsocket(token: string | null) {
       return;
     }
 
-    ws.current = new WebSocket(`ws://localhost:8080?token=${token}`);
+    ws.current = new WebSocket(`${process.env.NEXT_PUBLIC_WS_URL}?token=${token}`);
     // ws.current.binaryType = "arraybuffer"
     ws.current.onopen =  () => {
       setIsConnected(true);

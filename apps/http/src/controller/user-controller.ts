@@ -98,7 +98,7 @@ export const UploadEncryptedData = async(req:Request,res:Response) =>{
       ownerId:getUserId?.id,
     } 
   })
-  res.json({url:`http://localhost:3000/collaboration?id=${uploadEncryptedContent.id}`})
+  res.json({url:`${process.env.FRONTEND_URL}/collaboration?id=${uploadEncryptedContent.id}`})
 }
 export const downloadEncryptedContent = async(req:Request,res:Response) =>{
     const { id } = req.query;

@@ -50,7 +50,7 @@ export async function decryptMessage(
 export const uploadContentToserver = async (
   encryptedData: ArrayBuffer
 ): Promise<string> => {
-  const response = await fetch("http://localhost:9000/api/v1/upload", { method: "POST", body: encryptedData,headers:{ "Content-Type": "application/octet-stream" },credentials:"include" })
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/upload`, { method: "POST", body: encryptedData,headers:{ "Content-Type": "application/octet-stream" },credentials:"include" })
   
   const {url} = await response.json();
   return url
@@ -66,7 +66,7 @@ export const generateShareableURL = async (
   return url;
 };
 export const downloadEncryptedContent = async (id: string): Promise<ArrayBuffer> => {
-  const response = await fetch(`http://localhost:9000/api/v1/download?id=${id}`,{credentials:"include"});
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/download?id=${id}`,{credentials:"include"});
   const res = await response.arrayBuffer()
   return res
 };

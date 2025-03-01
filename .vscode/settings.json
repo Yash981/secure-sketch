@@ -3,5 +3,6 @@
     {
       "mode": "auto"
     }
-  ]
+  ],
+  "github-actions.workflows.pinned.workflows": []
 }
