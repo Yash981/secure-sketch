@@ -135,6 +135,9 @@ importers:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
+      '@repo/ws':
+        specifier: workspace:*
+        version: link:../ws
       '@types/cookie-parser':
         specifier: ^1.4.8
         version: 1.4.8(@types/express@5.0.0)
@@ -178,12 +181,6 @@ importers:
 
   apps/ws:
     dependencies:
-      bufferutil:
-        specifier: ^4.0.1
-        version: 4.0.9
-      utf-8-validate:
-        specifier: ^5.0.2
-        version: 5.0.10
       ws:
         specifier: ^8.18.0
         version: 8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
@@ -5219,6 +5216,7 @@ snapshots:
   bufferutil@4.0.9:
     dependencies:
       node-gyp-build: 4.8.4
+    optional: true
 
   busboy@1.6.0:
     dependencies:
@@ -6787,7 +6785,8 @@ snapshots:
     dependencies:
       whatwg-url: 5.0.0
 
-  node-gyp-build@4.8.4: {}
+  node-gyp-build@4.8.4:
+    optional: true
 
   node-plop@0.26.3:
     dependencies:
@@ -7821,6 +7820,7 @@ snapshots:
   utf-8-validate@5.0.10:
     dependencies:
       node-gyp-build: 4.8.4
+    optional: true
 
   util-deprecate@1.0.2: {}
 

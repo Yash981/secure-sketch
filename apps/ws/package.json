@@ -1,12 +1,14 @@
 {
-  "name": "ws",
+  "name": "@repo/ws",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "build":"tsc -b",
-    "start":"npm run build && node ./dist/websocket-server.js",
-    "dev": "tsx watch src/websocket-server.ts"
+    "start":"npm run build && node ./dist/websocket-server.js"
+  },
+  "exports":{
+    ".":"./src/websocket-server.ts"
   },
   "devDependencies": {
     "@repo/db": "workspace:*",

@@ -20,7 +20,8 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "@repo/ws":"workspace:*"
   },
   "keywords": [],
   "author": "",
