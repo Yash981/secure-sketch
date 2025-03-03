@@ -82,7 +82,7 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
         canvas.requestRenderAll();
       }
     };
-    handleResize()
+    // handleResize()
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);

@@ -345,6 +345,7 @@ export class CanvasGame {
     }
     if (this.selectedTool === "select") {
       this.canvas.isDrawingMode = false;
+      this.canvas.defaultCursor = 'default'
     }
     if (this.selectedTool === "pan") {
       this.canvas.isDrawingMode = false;
@@ -416,9 +417,9 @@ export class CanvasGame {
   clearCanvas() {
     this.canvas.clear();
     this.saveCanvasState();
-    setTimeout(() => {
-      this.sendCanvasData();
-    }, 1000);
+    // setTimeout(() => {
+    //   this.sendCanvasData();
+    // }, 1000);
   }
   deleteSelectedObject() {
     const activeObject = this.canvas.getActiveObject();
@@ -514,7 +515,7 @@ export class CanvasGame {
   };
   mouseDblClick(event: any) {
     this.canvas.defaultCursor = "crosshair";
-    const pointer = this.canvas.getPointer(event.e);
+    const pointer = this.canvas.getScenePoint(event.e);
     const text = new IText("", {
       left: pointer.x,
       top: pointer.y,
@@ -530,7 +531,6 @@ export class CanvasGame {
     this.canvas.defaultCursor = "text";
 
     text.on("editing:exited", () => {
-      this.canvas.defaultCursor = "default";
       this.setSelectedTool("select");
     });
   }
@@ -548,7 +548,7 @@ export class CanvasGame {
         return;
       }
       this.canvas.clear()
-      localStorage.removeItem('canvas')
+      // localStorage.removeItem('canvas')
       await this.canvas.loadFromJSON(parsedData.canvas)
     
 
@@ -558,10 +558,9 @@ export class CanvasGame {
 
     this.canvas.requestRenderAll();
 
-    requestAnimationFrame(() => {
-      this.saveCanvasState();
-      console.log('Canvas state saved after full rendering');
-    });
+    setTimeout(()=>{
+      this.saveCanvasState()
+    },1000)
 
     } catch (error) {
       console.error("Error loading decrypted data:", error);

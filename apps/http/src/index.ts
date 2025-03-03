@@ -3,7 +3,7 @@ import UserRouter from "./routes/v1/user-router";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import cors from 'cors'
-dotenv.config();
+dotenv.config({path: "../../.env"});
 const app =  express()
 
 app.use(express.json())
