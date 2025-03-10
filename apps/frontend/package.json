@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "cd ../../packages/db && bun prisma generate || true"
+    "postinstall": "cd ../../packages/db && npx prisma generate || true"
   },
   "dependencies": {
     "@hookform/resolvers": "^4.0.0",
