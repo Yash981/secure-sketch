@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build":"tsc -b",
-    "start":"npm run build && node ./dist/websocket-server.js"
+    "start":"tsx ./src/websocket-server.js"
   },
   "exports":{
     ".":"./src/websocket-server.ts"

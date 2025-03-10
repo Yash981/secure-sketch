@@ -1,11 +1,16 @@
 {
-  "name": "excalidraw-clone",
+  "name": "secure-sketch",
   "private": true,
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "db:generate":"cd packages/db && npx prisma generate && cd ../..",
+    "db:push":"cd packages/db && npx prisma db push && cd ../..",
+    "start:http":"cd apps/http && npm run start",
+    "start:ws":"cd apps/ws && npm run start",
+    "start:frontend":"cd apps/frontend && npm run start"
   },
   "devDependencies": {
     "prettier": "^3.2.5",

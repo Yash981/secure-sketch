@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "cd ../../packages/db && bun prisma generate || true"
   },
   "dependencies": {
     "@hookform/resolvers": "^4.0.0",

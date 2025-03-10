@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  http:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: http_service
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+    ports:
+      - "9000:9000"
+  websocket:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ws
+    container_name: websocket_service
+    environment:
+      DATABASE_URL:  ${DATABASE_URL}
+    ports:
+      - "8080:8080"
