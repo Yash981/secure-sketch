@@ -21,6 +21,7 @@ export const config = {
   matcher: [
     '/',
     '/signup',
-    '/login'
+    '/login',
+    '/collaboration/:path*'
   ]
 }

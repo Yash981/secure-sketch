@@ -62,9 +62,11 @@ export class CanvasGame {
     this.canvas.on("selection:created", this.handleSelectionCreated.bind(this));
     this.canvas.on("selection:updated", this.handleSelectionUpdated.bind(this));
     this.canvas.on("selection:cleared", this.handleSelectionCleared.bind(this));
-    this.canvas.on("mouse:down", this.handlePanStart);
-    this.canvas.on("mouse:move", this.handlePanMove);
-    this.canvas.on("mouse:up", this.handlePanEnd);
+    if(this.selectedTool === 'pan'){
+      this.canvas.on("mouse:down", this.handlePanStart);
+      this.canvas.on("mouse:move", this.handlePanMove);
+      this.canvas.on("mouse:up", this.handlePanEnd);
+    }
   }
   private cleanupEventListeners() {
     this.canvas.off("mouse:down");
@@ -280,6 +282,7 @@ export class CanvasGame {
       if (canvasContainer && canvasContainer.contains(cursorDot)) {
         canvasContainer.removeChild(cursorDot);
       }
+      this.saveCanvasState()
       this.sendCanvasData();
       this.canvas.off("mouse:move", eraseObjects);
       this.canvas.off("mouse:down", mouseDownHandler);
@@ -472,7 +475,7 @@ export class CanvasGame {
     this.isPanning = true;
     this.canvas.defaultCursor = "grabbing";
 
-    const pointer = this.canvas.getPointer(event.e);
+    const pointer = this.canvas.getScenePoint(event.e);
     this.lastPanX = pointer.x;
     this.lastPanY = pointer.y;
 
@@ -492,8 +495,13 @@ export class CanvasGame {
     const vpt = this.canvas.viewportTransform;
     if (!vpt) return;
 
-    vpt[4] += deltaX;
-    vpt[5] += deltaY;
+    // vpt[4] += deltaX;
+    // vpt[5] += deltaY;
+    const MAX_TRANSLATE = this.canvas.getWidth() * 2;
+    const MIN_TRANSLATE = -this.canvas.getWidth();
+
+    vpt[4] = Math.max(MIN_TRANSLATE, Math.min(MAX_TRANSLATE, vpt[4] + deltaX));
+    vpt[5] = Math.max(MIN_TRANSLATE, Math.min(MAX_TRANSLATE, vpt[5] + deltaY));
 
     this.canvas.setViewportTransform(vpt);
     this.canvas.requestRenderAll();
@@ -531,6 +539,7 @@ export class CanvasGame {
     this.canvas.defaultCursor = "text";
 
     text.on("editing:exited", () => {
+      this.canvas.selection = false
       this.setSelectedTool("select");
     });
   }

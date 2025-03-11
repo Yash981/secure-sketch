@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build":"tsc -b",
-    "start":"tsx ./src/websocket-server.js"
+    "start":"tsx ./src/websocket-server.ts",
+    "dev":"tsx watch ./src/websocket-server.ts"
   },
   "exports":{
     ".":"./src/websocket-server.ts"
