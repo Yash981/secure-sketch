@@ -11,7 +11,7 @@ export function useWebsocket(token: string | null) {
       console.warn("Token is required to connect.");
       return;
     }
-    ws.current = new WebSocket(`ws://localhost:9000?token=${token}`);
+    ws.current = new WebSocket(`${process.env.NEXT_PUBLIC_WS_URL}?token=${token}`);
     // ws.current.binaryType = "arraybuffer"
     ws.current.onopen =  () => {
       setIsConnected(true);

@@ -11,7 +11,7 @@ app.use(express.json())
 app.use(express.raw({ type: "application/octet-stream", limit: "10mb" }));
 app.use(cookieParser())
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL,
     credentials:true
   }))
 app.use('/api/v1',UserRouter) 
