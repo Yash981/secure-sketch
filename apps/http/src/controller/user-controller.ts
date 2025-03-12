@@ -67,7 +67,7 @@ export const UserSignIn = async (req: Request, res: Response) => {
     res.setHeader("Set-Cookie", [
       `token=${token}; Path=/; HttpOnly; Max-Age=${7 * 24 * 60 * 60}; ${
         process.env.NODE_ENV === "production"
-          ? "Secure; SameSite=Strict"
+          ? "Secure; SameSite=None"
           : "SameSite=Lax"
       }`,
     ]);

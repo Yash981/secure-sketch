@@ -66,7 +66,7 @@ export const uploadContentToserver = async (
     }
   )
   
-  const {url} = await response.data.json();
+  const {url} = await response.data;
   return url
 };
 export const generateShareableURL = async (
