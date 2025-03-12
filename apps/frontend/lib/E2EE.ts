@@ -1,4 +1,10 @@
 "use client"
+import axios from "axios";
+import https from "https";
+
+const httpsAgent = new https.Agent({  
+  rejectUnauthorized: false,
+});
 export const generateKey = async (): Promise<CryptoKey> => {
   return await window.crypto.subtle.generateKey(
     { name: "AES-GCM", length: 128 },
@@ -50,9 +56,17 @@ export async function decryptMessage(
 export const uploadContentToserver = async (
   encryptedData: ArrayBuffer
 ): Promise<string> => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/upload`, { method: "POST", body: encryptedData,headers:{ "Content-Type": "application/octet-stream" },credentials:"include" })
+  const response = await axios.post(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/upload`, 
+    encryptedData,
+    {
+      headers: { "Content-Type": "application/octet-stream" },
+      withCredentials: true, 
+      httpsAgent,
+    }
+  )
   
-  const {url} = await response.json();
+  const {url} = await response.data.json();
   return url
 };
 export const generateShareableURL = async (
@@ -66,8 +80,16 @@ export const generateShareableURL = async (
   return url;
 };
 export const downloadEncryptedContent = async (id: string): Promise<ArrayBuffer> => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/download?id=${id}`,{credentials:"include"});
-  const res = await response.arrayBuffer()
+  const response = await axios.get<ArrayBuffer>(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/download`,
+    {
+      params: { id }, 
+      withCredentials: true, 
+      responseType: "arraybuffer",  
+      httpsAgent,
+    }
+  );
+  const res = response.data
   return res
 };
 export async function ExtractKeyFromURL():Promise<CryptoKey | null> {
