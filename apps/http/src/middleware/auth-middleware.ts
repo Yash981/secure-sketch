@@ -12,14 +12,15 @@ export const authenticateUser = (
   res: Response,
   next: NextFunction
 ) => {
+  console.log(req.cookies,'cookies')
   const token = req.cookies.token as string;
+  console.log(token,'tokennnnn')
   if (!token) {
     res.status(401).json({ message: "Unauthorized" });
     return 
   }
   try {
     const decode = jwt.decode(token) as { exp: number };
-    //
     if (!decode || decode.exp < Date.now() / 1000) { 
       res.status(401).json({ message: "Unauthorized" });
       return 

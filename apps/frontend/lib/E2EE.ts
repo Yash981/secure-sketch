@@ -56,18 +56,23 @@ export async function decryptMessage(
 export const uploadContentToserver = async (
   encryptedData: ArrayBuffer
 ): Promise<string> => {
-  const response = await axios.post(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/upload`, 
-    encryptedData,
-    {
-      headers: { "Content-Type": "application/octet-stream" },
-      withCredentials: true, 
-      httpsAgent,
-    }
-  )
+  try {
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/upload`, 
+      encryptedData,
+      {
+        headers: { "Content-Type": "application/octet-stream" },
+        withCredentials: true, 
+        httpsAgent,
+      }
+    )
+    const {url} = await response.data;
+    return url
+  } catch (error: any) {
+    console.log(error,'errrorrrrrr')
+    throw new Error(`Failed to upload content: ${error.message}`);
+  }
   
-  const {url} = await response.data;
-  return url
 };
 export const generateShareableURL = async (
   key: CryptoKey,
