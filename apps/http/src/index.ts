@@ -12,10 +12,11 @@ app.use(express.raw({ type: "application/octet-stream", limit: "10mb" }));
 app.use(cookieParser());
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'https://secure-sketch.vercel.app/',
+    origin: process.env.FRONTEND_URL || 'https://secure-sketch.vercel.app',
     credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization","Set-Cookie"],
     methods: ["GET", "POST", "PUT", "DELETE"],
+    exposedHeaders: ["Set-cookie"],
   })
 );
 app.use("/api/v1", UserRouter);
