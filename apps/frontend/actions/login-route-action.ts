@@ -20,7 +20,6 @@ export const LoginRouteAction = async (data: UserAuthFormSchema) => {
         name: "token",
         value: setCookieHeader[0].split(";")[0].split("=")[1],
         httpOnly: true,
-        path: "/",
         maxAge: 7 * 24 * 60 * 60,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",

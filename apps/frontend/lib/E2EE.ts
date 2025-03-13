@@ -1,6 +1,5 @@
 "use client"
 
-import axios from "axios";
 
 export const generateKey = async (): Promise<CryptoKey> => {
   return await window.crypto.subtle.generateKey(
@@ -54,13 +53,23 @@ export const uploadContentToServer = async (
   encryptedData: ArrayBuffer
 ): Promise<string> => {
   try {
+    let headers: HeadersInit = { "Content-Type": "application/octet-stream" };
+    const token = localStorage.getItem("excaliWsToken");
+
+    if (token) {
+      headers = {
+        ...headers,
+        Authorization: `Bearer ${token}`,
+      };
+    }
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/upload`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/octet-stream" },
+        headers: headers,
         credentials: "include", 
         body: encryptedData,
+        
       }
     );
 
@@ -86,17 +95,39 @@ export const generateShareableURL = async (
   return url;
 };
 export const downloadEncryptedContent = async (id: string): Promise<ArrayBuffer> => {
-  const response = await axios.get<ArrayBuffer>(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/download`,
-    {
-      params: { id }, 
-      withCredentials: true, 
-      responseType: "arraybuffer",  
+  try {
+    let headers: HeadersInit = {};
+
+    const token = localStorage.getItem("excaliWsToken");
+
+    if (token) {
+      headers = {
+        ...headers,
+        Authorization: `Bearer ${token}`,
+      };
     }
-  );
-  const res = response.data
-  return res
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/download?id=${encodeURIComponent(id)}`,
+      {
+        method: "GET",
+        headers,
+        credentials: "include", 
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to download content: ${response.statusText}`);
+    }
+
+    const data = await response.arrayBuffer();
+    return data;
+  } catch (error: any) {
+    console.error(error, "Download error");
+    throw new Error(`Failed to download content: ${error.message}`);
+  }
 };
+
 export async function ExtractKeyFromURL():Promise<CryptoKey | null> {
     const hashedValue = window.location.hash
     if(!hashedValue.includes("#key=")) return null;

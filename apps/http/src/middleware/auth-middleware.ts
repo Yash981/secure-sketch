@@ -13,8 +13,12 @@ export const authenticateUser = (
   next: NextFunction
 ) => {
   console.log(req.cookies,'cookies')
-  const token = req.cookies.token as string;
+  let token = req.cookies?.token;
   console.log(token,'tokennnnn')
+  if (!token && req.headers.authorization?.startsWith("Bearer ")) {
+    token = req.headers.authorization.split(" ")[1]; 
+  }
+  console.log(token,'bearer')
   if (!token) {
     res.status(401).json({ message: "Unauthorized" });
     return 
