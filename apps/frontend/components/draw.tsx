@@ -9,7 +9,7 @@ import ZoomCanvas from "./zoom-canvas";
 const Draw = () => {
     return (
       <div className='relative w-screen h-screen'>
-        <TopBar className="fixed top-3 left-1/2 transform -translate-x-1/2 z-10"/>
+        <TopBar className="fixed top-3 lg:left-1/2 sm:left-[33%] transform -translate-x-1/2 z-10"/>
         <div className="z-10 relative">
         <Collaboration/>
         </div>

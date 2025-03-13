@@ -1,10 +1,7 @@
 "use client"
-import axios from "axios";
-import https from "https";
 
-const httpsAgent = new https.Agent({  
-  rejectUnauthorized: false,
-});
+import axios from "axios";
+
 export const generateKey = async (): Promise<CryptoKey> => {
   return await window.crypto.subtle.generateKey(
     { name: "AES-GCM", length: 128 },
@@ -63,7 +60,6 @@ export const uploadContentToserver = async (
       {
         headers: { "Content-Type": "application/octet-stream" },
         withCredentials: true, 
-        httpsAgent,
       }
     )
     const {url} = await response.data;
@@ -91,7 +87,6 @@ export const downloadEncryptedContent = async (id: string): Promise<ArrayBuffer>
       params: { id }, 
       withCredentials: true, 
       responseType: "arraybuffer",  
-      httpsAgent,
     }
   );
   const res = response.data
