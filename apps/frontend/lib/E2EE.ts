@@ -50,31 +50,36 @@ export async function decryptMessage(
     throw new Error('Decryption failed. Please check the key and data.',error);
   }
 }
-export const uploadContentToserver = async (
+export const uploadContentToServer = async (
   encryptedData: ArrayBuffer
 ): Promise<string> => {
   try {
-    const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/upload`, 
-      encryptedData,
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/upload`,
       {
+        method: "POST",
         headers: { "Content-Type": "application/octet-stream" },
-        withCredentials: true, 
+        credentials: "include", 
+        body: encryptedData,
       }
-    )
-    const {url} = await response.data;
-    return url
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to upload content: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.url;
   } catch (error: any) {
-    console.log(error,'errrorrrrrr')
+    console.log(error, "errrorrrrrr");
     throw new Error(`Failed to upload content: ${error.message}`);
   }
-  
 };
 export const generateShareableURL = async (
   key: CryptoKey,
   encryptedData: ArrayBuffer
 ): Promise<string> => {
-  const objectUrl = await uploadContentToserver(encryptedData);
+  const objectUrl = await uploadContentToServer(encryptedData);
   const exportedKey = await window.crypto.subtle.exportKey("jwk", key);
   const objectKey = encodeURIComponent(exportedKey.k!);
   const url = objectUrl + "#key=" + objectKey;
