@@ -64,6 +64,7 @@ export const UserSignIn = async (req: Request, res: Response) => {
     }
     const token = generateToken(parsedSignInData.data.email);
 
+    
     res.setHeader("Set-Cookie", [
       `token=${token}; Path=/; HttpOnly; Max-Age=${7 * 24 * 60 * 60}; ${
         process.env.NODE_ENV === "production"
@@ -71,6 +72,13 @@ export const UserSignIn = async (req: Request, res: Response) => {
           : "SameSite=Lax"
       }`,
     ]);
+    res.cookie("token", token, {
+      httpOnly: true,
+      maxAge:7 * 24 * 60 * 60, 
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      path: "/",
+    });
     res.status(200).json({ token,username:existingUser.email.split('@')[0] });
     return;
   } catch (error) {
