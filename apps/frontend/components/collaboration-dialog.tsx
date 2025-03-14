@@ -50,12 +50,6 @@ export function CollaborationDialog() {
                     window.history.replaceState('', '', `/collaboration/${new URL(url).pathname.split('/')[2]}${new URL(url).hash}`);
                 };
             }
-            setTimeout(() => {
-                if(ws.current && ws.current.readyState === WebSocket.OPEN){
-                    sendMessage(JSON.stringify({ type: EventTypes.CREATE_ROOM,payload:{roomId:new URL(url).pathname.split('/').pop() }}));
-                    console.log("Sent CREATE_ROOM after connecting.");  
-                }
-            }, 500);
 
         } catch (error:any) {
             console.log(error,'error upload encryted data')

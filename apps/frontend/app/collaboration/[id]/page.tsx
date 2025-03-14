@@ -12,7 +12,7 @@ import Collaboration from "@/components/collaboration";
 import { ClearDialog } from "@/components/clear-dialog";
 
 export default function CollaborationPage() {
-  const { connect, sendMessage, lastMessage } = useWebsocket(typeof window !== 'undefined' ? localStorage.getItem('excaliWsToken') : null)
+  const { connect, sendMessage, lastMessage,ws } = useWebsocket(typeof window !== 'undefined' ? localStorage.getItem('excaliWsToken') : null)
   const [decryptedData, setDecryptedData] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
@@ -23,12 +23,14 @@ export default function CollaborationPage() {
         if (data) {
           setDecryptedData(data);
           connect()
-          setTimeout(() => {
-            const roomId = window.location.pathname.split("/").pop();
-            if (roomId) {
-              sendMessage(JSON.stringify({ type: EventTypes.JOIN_ROOM, payload: { roomId } }))
+          if(ws.current){
+            ws.current.onopen = () =>{
+              const roomId = window.location.pathname.split("/").pop();
+              if (roomId) {
+                sendMessage(JSON.stringify({ type: EventTypes.JOIN_ROOM, payload: { roomId } }))
+              }
             }
-          }, 500)
+          }
         }
       } catch (error) {
         console.log(error, 'error')
