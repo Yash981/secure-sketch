@@ -46,7 +46,7 @@ export function CollaborationDialog() {
                     window.history.replaceState('', '', `/collaboration/${new URL(url).pathname.split('/')[2]}${new URL(url).hash}`);
                     
                 }
-            }, 500);
+            }, 1000);
 
         } catch (error:any) {
             console.log(error,'error upload encryted data')
