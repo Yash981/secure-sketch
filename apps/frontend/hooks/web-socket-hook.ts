@@ -41,15 +41,14 @@ export function useWebsocket(token: string | null) {
     }
   }, []);
 
-  const sendMessage = useCallback(
-    (data: string) => {
+  const sendMessage = useCallback((data: string) => {
       if (ws.current && ws.current.readyState === WebSocket.OPEN) {
         ws.current.send(data);
       } else {
         console.warn("WebSocket is not connected.");
       }
     },
-    []
+    [isConnected]
   );
 
   return { connect, disconnect, sendMessage, lastMessage, isConnected,ws };
