@@ -126,3 +126,7 @@ export const downloadEncryptedContent = async(req:Request,res:Response) =>{
     res.setHeader("Content-Type", "application/octet-stream");
     res.send(Buffer.from(getEncryptedContent?.encryptedData))
 }
+export const Cronjobfn = (req:Request,res:Response)=>{
+  res.status(200).send("Cronjob performed successfully")
+  return;
+}
