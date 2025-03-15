@@ -1,8 +1,14 @@
 # secure-sketch video demo
-[![Demo](https://img.youtube.com/vi/vCYSyV_u2WQ/0.jpg)](https://youtu.be/vCYSyV_u2WQ)
+<a href="https://youtu.be/vCYSyV_u2WQ" target="_blank">
+  <img src="https://img.youtube.com/vi/vCYSyV_u2WQ/0.jpg" alt="Demo">
+</a>
+
 
 # collaboration video demo
-[![Demo](https://img.youtube.com/vi/IZ5xz6pPLxE/0.jpg)](https://youtu.be/IZ5xz6pPLxE)
+<a href="https://youtu.be/IZ5xz6pPLxE" target="_blank">
+  <img src="https://img.youtube.com/vi/IZ5xz6pPLxE/0.jpg" alt="Demo">
+</a>
+
 # Turborepo starter
 
 This is an official starter Turborepo.
