@@ -4,24 +4,26 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build":"tsc -b",
-    "start":"tsx ./src/websocket-server.ts",
-    "dev":"tsx watch ./src/websocket-server.ts"
+    "build": "tsc -b",
+    "start": "tsx ./src/websocket-server.ts",
+    "dev": "tsx watch ./src/websocket-server.ts"
   },
-  "exports":{
-    ".":"./src/websocket-server.ts"
+  "exports": {
+    ".": "./src/websocket-server.ts"
   },
   "devDependencies": {
+    "@repo/backend-common": "workspace:*",
     "@repo/db": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@types/node-cron": "^3.0.11",
     "@types/ws": "^8.5.14",
-    "@repo/backend-common":"workspace:*",
     "tsx": "^4.19.2"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "node-cron": "^3.0.3",
     "ws": "^8.18.0"
   }
 }

@@ -1,11 +1,14 @@
 import { WebSocket, WebSocketServer } from "ws";
 import { VerifyUser } from "@repo/backend-common";
 import { CollaborationManager, User } from "./managers/collaboration-manager";
+import cron from 'node-cron';
 const PORT = Number(process.env.PORT) || 8080; 
 const wss = new WebSocketServer({ port:PORT });
 
 const collobrationManager = new CollaborationManager();
-
+cron.schedule('*/14 * * * *',()=>{
+  console.log("Running Cronjob Every 14 minutes")
+})
 wss.on("listening", () => {
   console.log("WebSocket server is now running");
 });
