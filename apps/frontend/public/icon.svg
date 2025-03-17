@@ -1,0 +1,17 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Shield base with gradient -->
+  <path d="M256 32L72 120V248C72 352.6 147.6 447.8 256 480C364.4 447.8 440 352.6 440 248V120L256 32Z" fill="url(#shield-gradient)"/>
+  
+  <!-- Pencil -->
+  <path d="M320 180L280 140L190 230L230 270L320 180Z" fill="white"/>
+  <path d="M170 250L190 230L230 270L210 290L170 250Z" fill="#E6E6E6"/>
+  <path d="M340 160L320 180L280 140L300 120L340 160Z" fill="#FFD700"/>
+  
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="shield-gradient" x1="72" y1="32" x2="440" y2="480" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+</svg> 
