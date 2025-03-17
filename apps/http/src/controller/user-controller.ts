@@ -126,6 +126,28 @@ export const downloadEncryptedContent = async(req:Request,res:Response) =>{
     res.setHeader("Content-Type", "application/octet-stream");
     res.send(Buffer.from(getEncryptedContent?.encryptedData))
 }
+export const UserLogout = async(req:Request,res:Response) =>{
+  try {
+    res.clearCookie('token',{
+      path: '/',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    });
+    res.setHeader('Set-Cookie', [
+      `token=; HttpOnly; Path=/; Max-Age=0; ${
+        process.env.NODE_ENV === 'production'
+          ? 'Secure; SameSite=None'
+          : 'SameSite=Lax'
+      }`
+    ]);
+    res.status(200).json({message:"Logout Successful"})
+    return;
+  } catch (error) {
+    res.status(500).json({message:"Error logging out",error})
+    return;
+  }
+}
 export const Cronjobfn = (req:Request,res:Response)=>{
   res.status(200).send("Cronjob performed successfully")
   return;
