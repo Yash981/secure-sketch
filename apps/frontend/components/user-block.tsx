@@ -30,7 +30,7 @@ export function UserBlock() {
       if (result.success) {
         localStorage.removeItem("excaliWsToken");
         localStorage.removeItem("excaliUsername");
-        router.push("/login");
+        router.push("/home");
         router.refresh();
       } else {
         console.error("Logout failed:", result.error);

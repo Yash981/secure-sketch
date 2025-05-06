@@ -13,7 +13,7 @@ import Link from "next/link";
 
 
 export const AuthForm = () => {
-    const [error , setError] = useState<string | null>(null)
+    const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
     const pathname = usePathname()
     const router = useRouter()
@@ -30,16 +30,16 @@ export const AuthForm = () => {
             return setError(parsedData.error.errors[0].message)
         }
         setIsLoading(true)
-        if(pathname === "/login"){
+        if (pathname === "/login") {
             try {
                 const response = await LoginRouteAction(data)
                 if (!response.success) {
                     return setError(response.error); // Display the error message
                 }
                 console.log(response)
-                if(response && response.data.token){
-                    localStorage.setItem('excaliWsToken',response.data.token)
-                    localStorage.setItem('excaliUsername',response.data.username)
+                if (response && response.data.token) {
+                    localStorage.setItem('excaliWsToken', response.data.token)
+                    localStorage.setItem('excaliUsername', response.data.username)
                 }
                 router.push("/")
             } catch (error) {
@@ -55,7 +55,7 @@ export const AuthForm = () => {
                 }
                 console.log(response)
                 router.push("/login")
-            } catch (error:any) {
+            } catch (error: any) {
                 setError(error)
             } finally {
                 setIsLoading(false)
@@ -72,7 +72,7 @@ export const AuthForm = () => {
                         <FormItem>
                             <FormLabel>Email</FormLabel>
                             <FormControl>
-                                <Input type="email" {...field} disabled={isLoading}/>
+                                <Input type="email" {...field} disabled={isLoading} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -85,22 +85,44 @@ export const AuthForm = () => {
                         <FormItem>
                             <FormLabel>Password</FormLabel>
                             <FormControl>
-                                <Input type="password" {...field}  disabled={isLoading}/>
+                                <Input type="password" {...field} disabled={isLoading} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
                 <FormMessage>{error}</FormMessage>
-                <div className="flex">
-                    <Link href={pathname === "/login" ? "/signup" : "/login"} className="flex">
-                        {pathname === "/login" ? "Don't have an account? " : "Already have an account? " }<p className="hover:underline">{pathname !== "/login" ? ' Login' : ' Signup'}</p>
-                    </Link>
+                <div className="space-y-6 mt-4">
+                    <Button type="submit" variant="default" disabled={isLoading} className="w-full text-base font-semibold">
+                        {pathname === "/login" ? "Login" : "Sign Up"}
+                    </Button>
+
+                    <div className="text-center text-sm text-gray-600">
+                        {pathname === "/login" ? "Don't have an account?" : "Already have an account?"}
+                        <Link href={pathname === "/login" ? "/signup" : "/login"}>
+                            <span className="ml-1 text-sketch-purple font-medium hover:underline">
+                                {pathname === "/login" ? "Sign Up" : "Login"}
+                            </span>
+                        </Link>
+                    </div>
+
+                    <Button variant="link" className="text-sm text-sketch-purple hover:underline hover:text-sketch-charcoal mx-auto block" onClick={async () => {
+                        form.setValue("email", "yyyyy@gmail.com");
+                        form.setValue("password", "YY@@$$h8919551587");
+                        try {
+                            await onSubmit({
+                                email: "yyyyy@gmail.com",
+                                password: "YY@@$$h8919551587"
+                            });
+                        } catch (error) {
+                            setError((error as Error).message)
+                        }
+                    }}>
+                        Sign in as Guest User
+                    </Button>
                 </div>
-                <Button type="submit" variant={"default"} disabled={isLoading} className="w-full">
-                    {pathname === "/login" ? "Login" : "Signup"}
-                </Button>
             </form>
         </Form>
+
     )
 }

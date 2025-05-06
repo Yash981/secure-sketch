@@ -66,7 +66,27 @@ body {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
+}
+
+.hero-gradient {
+  background: linear-gradient(135deg, rgba(214, 188, 250, 0.2) 0%, rgba(126, 105, 171, 0.3) 100%);
+}
+
+.feature-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px -5px rgba(126, 105, 171, 0.4);
+}
+
+.sketch-line {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
 }
