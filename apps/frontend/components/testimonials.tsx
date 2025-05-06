@@ -44,7 +44,7 @@ const Testimonials = () => {
                 ))}
               </div>
               <p className="text-gray-700 mb-6 italic">
-                "{testimonial.quote}"
+                &quot;{testimonial.quote}&quot;
               </p>
               <div>
                 <p className="font-semibold text-sketch-charcoal">{testimonial.author}</p>
