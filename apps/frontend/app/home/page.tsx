@@ -11,7 +11,24 @@ import React, { useEffect, useState } from 'react'
 const Home = () => {
     const [status, setStatus] = useState<null | "loading" | "done">("loading");
     useEffect(() => {
-        waitCronjobs().then(() => {
+        (async function waitCronjobs() {
+            const urls = [
+                "https://secure-sketch-http.onrender.com/api/v1/cronjob",
+                "https://secure-sketch-ws.onrender.com/cronjob"
+            ];
+        
+            const requests = urls.map(url => fetch(url));
+            const results = await Promise.allSettled(requests)
+        
+            const allSuccessful = results.every(
+                (r) => r.status === "fulfilled" && r.value.status === 200
+            );
+            if (!allSuccessful) {
+                await new Promise(resolve => setTimeout(resolve, 50000));
+            }
+        
+            return results;
+        })().then(() => {
             setStatus("done");
         });
     }, []);
@@ -37,21 +54,3 @@ const Home = () => {
 
 export default Home
 
-export async function waitCronjobs() {
-    const urls = [
-        "https://secure-sketch-http.onrender.com/api/v1/cronjob",
-        "https://secure-sketch-ws.onrender.com/cronjob"
-    ];
-
-    const requests = urls.map(url => fetch(url));
-    const results = await Promise.allSettled(requests)
-
-    const allSuccessful = results.every(
-        (r) => r.status === "fulfilled" && r.value.status === 200
-    );
-    if (!allSuccessful) {
-        await new Promise(resolve => setTimeout(resolve, 50000));
-    }
-
-    return results;
-}
