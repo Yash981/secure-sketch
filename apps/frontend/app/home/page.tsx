@@ -7,15 +7,21 @@ import HowItWorks from '@/components/how-it-works'
 import Privacy from '@/components/privacy'
 import React from 'react'
 
-const warmUpServices = () => {
-    Promise.allSettled([
-      fetch("https://secure-sketch-http.onrender.com/api/v1/cronjob"),
-      fetch("https://secure-sketch-ws.onrender.com/cronjob")
-    ]).catch(()=>{});
+const warmUpServices = async () => {
+    try {
+        const res = await Promise.allSettled([
+            fetch("https://secure-sketch-http.onrender.com/api/v1/cronjob"),
+            fetch("https://secure-sketch-ws.onrender.com/cronjob")
+          ])
+        return res
+    } catch (error) {
+        return error
+    }
 };
 export const dynamic = 'force-dynamic';
-const Home = () => {
-    warmUpServices();
+const Home = async () => {
+    const res = await warmUpServices();
+    console.log(res,'result')
     return (
         <div className="min-h-screen flex flex-col">
             <Header />
