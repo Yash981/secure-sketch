@@ -14,7 +14,7 @@ const warmUpServices = () => {
     ]);
 };
   
-const Home = async () => {
+const Home = () => {
     warmUpServices()
     return (
         <div className="min-h-screen flex flex-col">
