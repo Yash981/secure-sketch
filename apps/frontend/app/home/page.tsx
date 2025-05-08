@@ -11,11 +11,11 @@ const warmUpServices = () => {
     Promise.allSettled([
       fetch("https://secure-sketch-http.onrender.com/api/v1/cronjob"),
       fetch("https://secure-sketch-ws.onrender.com/cronjob")
-    ]);
+    ]).catch(()=>{});
 };
-  
+export const dynamic = 'force-dynamic';
 const Home = () => {
-    warmUpServices()
+    warmUpServices();
     return (
         <div className="min-h-screen flex flex-col">
             <Header />
