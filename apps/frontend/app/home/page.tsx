@@ -17,7 +17,7 @@ const Home = () => {
                 "https://secure-sketch-ws.onrender.com/cronjob"
             ];
         
-            const requests = urls.map(url => fetch(url));
+            const requests = urls.map(url => fetch(url).catch(err => err));
             const results = await Promise.allSettled(requests)
         
             const allSuccessful = results.every(
@@ -27,10 +27,8 @@ const Home = () => {
                 await new Promise(resolve => setTimeout(resolve, 50000));
             }
         
-            return results;
-        })().then(() => {
             setStatus("done");
-        });
+        })();
     }, []);
 
     if (status === "loading") {
