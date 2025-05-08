@@ -19,7 +19,7 @@ const CTA = () => {
               </h2>
               <p className="text-sketch-lightPurple text-lg">
                 Join thousands of professionals who trust Secure-Sketch for their collaborative drawing needs.
-                No credit card required to get started.
+                No signup  required to get started.
               </p>
             </div>
             <div className="flex flex-col gap-4">

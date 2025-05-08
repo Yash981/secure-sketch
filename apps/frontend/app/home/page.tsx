@@ -7,8 +7,15 @@ import HowItWorks from '@/components/how-it-works'
 import Privacy from '@/components/privacy'
 import React from 'react'
 
-
-const Home = () => {
+const warmUpServices = () => {
+    Promise.allSettled([
+      fetch("https://secure-sketch-http.onrender.com/api/v1/cronjob"),
+      fetch("https://secure-sketch-ws.onrender.com/cronjob")
+    ]);
+};
+  
+const Home = async () => {
+    warmUpServices()
     return (
         <div className="min-h-screen flex flex-col">
             <Header />
