@@ -1,3 +1,4 @@
+"use client"
 import CTA from '@/components/CTA'
 import Features from '@/components/features'
 import Footer from '@/components/footer'
@@ -5,23 +6,19 @@ import Header from '@/components/header'
 import Hero from '@/components/hero'
 import HowItWorks from '@/components/how-it-works'
 import Privacy from '@/components/privacy'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
-const warmUpServices = async () => {
-    try {
-        const res = await Promise.allSettled([
-            fetch("https://secure-sketch-http.onrender.com/api/v1/cronjob"),
-            fetch("https://secure-sketch-ws.onrender.com/cronjob")
-          ])
-        return res
-    } catch (error) {
-        return error
+const Home = () => {
+    const [status, setStatus] = useState<null | "loading" | "done">("loading");
+    useEffect(() => {
+        waitCronjobs().then(() => {
+            setStatus("done");
+        });
+    }, []);
+
+    if (status === "loading") {
+        return <p>⏳ Warming up services, please wait...</p>;
     }
-};
-export const dynamic = 'force-dynamic';
-const Home = async () => {
-    const res = await warmUpServices();
-    console.log(res,'result')
     return (
         <div className="min-h-screen flex flex-col">
             <Header />
@@ -39,3 +36,22 @@ const Home = async () => {
 }
 
 export default Home
+
+export async function waitCronjobs() {
+    const urls = [
+        "https://secure-sketch-http.onrender.com/api/v1/cronjob",
+        "https://secure-sketch-ws.onrender.com/cronjob"
+    ];
+
+    const requests = urls.map(url => fetch(url));
+    const results = await Promise.allSettled(requests)
+
+    const allSuccessful = results.every(
+        (r) => r.status === "fulfilled" && r.value.status === 200
+    );
+    if (!allSuccessful) {
+        await new Promise(resolve => setTimeout(resolve, 50000));
+    }
+
+    return results;
+}

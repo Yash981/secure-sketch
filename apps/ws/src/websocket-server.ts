@@ -8,7 +8,19 @@ const app = express()
 app.get('/cronjob',(req,res)=>{
   res.status(200).send("Cronjob running successfully")
 })
-
+// // Create HTTP server without Express
+// const server = http.createServer((req, res) => {
+//   // Handle the cronjob endpoint
+//   if (req.url === '/cronjob' && req.method === 'GET') {
+//     res.writeHead(200, { 'Content-Type': 'text/plain' });
+//     res.end('Cronjob running successfully');
+//     return;
+//   }
+  
+//   // Handle other HTTP requests or 404
+//   res.writeHead(404, { 'Content-Type': 'text/plain' });
+//   res.end('Not found');
+// });
 const PORT = Number(process.env.PORT) || 8080;
 const server = http.createServer(app)
 
