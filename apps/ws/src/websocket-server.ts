@@ -3,8 +3,17 @@ import { VerifyUser } from "@repo/backend-common";
 import { CollaborationManager, User } from "./managers/collaboration-manager";
 import express from 'express'
 import http from 'http'
-
+import cors from 'cors';
 const app = express()
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || 'https://secure-sketch.vercel.app',
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization","Set-Cookie"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    exposedHeaders: ["Set-cookie"],
+  })
+)
 app.get('/cronjob',(req,res)=>{
   res.status(200).send("Cronjob running successfully")
 })
