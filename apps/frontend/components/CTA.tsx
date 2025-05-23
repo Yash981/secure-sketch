@@ -36,6 +36,8 @@ const CTA = () => {
                 if (res.success) {
                   router.push('/')
                   router.refresh()
+                  localStorage.setItem('excaliWsToken', res.data.token)
+                  localStorage.setItem('excaliUsername', res.data.username)
                 } else {
                   console.log(res,'ress')
                   setError((res.error as Error).message || res.error)
