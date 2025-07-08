@@ -36,7 +36,6 @@ export const AuthForm = () => {
                 if (!response.success) {
                     return setError(response.error); // Display the error message
                 }
-                console.log(response)
                 if (response && response.data.token) {
                     localStorage.setItem('excaliWsToken', response.data.token)
                     localStorage.setItem('excaliUsername', response.data.username)
@@ -53,7 +52,6 @@ export const AuthForm = () => {
                 if (!response.success) {
                     return setError(response.error);
                 }
-                console.log(response)
                 router.push("/login")
             } catch (error: any) {
                 setError(error)

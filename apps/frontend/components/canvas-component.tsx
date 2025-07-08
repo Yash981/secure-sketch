@@ -257,14 +257,11 @@ const CanvasComponent = ({ decryptedData, sendMessage, lastMessage }: { decrypte
     }
 
     if (lastMessage.type === EventTypes.USER_LEFT) {
-      console.log('user left')
 
       const { userId } = lastMessage.payload;
-      // console.log(canvas.getObjects(), 'objects', userId)
       const cursorToRemove = canvas.getObjects().find((obj: any) => obj.email === userId);
 
       if (cursorToRemove) {
-        console.log('going to remove')
         canvas.remove(cursorToRemove);
         canvas.requestRenderAll();
       }

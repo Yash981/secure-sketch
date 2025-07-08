@@ -80,7 +80,7 @@ export const uploadContentToServer = async (
     const data = await response.json();
     return data.url;
   } catch (error: any) {
-    console.log(error, "errrorrrrrr");
+    console.log(error, "error uploading content");
     throw new Error(`Failed to upload content: ${error.message}`);
   }
 };

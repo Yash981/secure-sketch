@@ -92,7 +92,6 @@ export class CollaborationManager {
   }
 
   broadcastToRoom(message: any, excludeUserId?: string,roomId?: string) {
-    console.log('broadcasting to room', message, excludeUserId, roomId);
     let currentRoomId = roomId || null;
     if (!currentRoomId) {
       for (const [key, value] of this.rooms.entries()) {
@@ -104,10 +103,8 @@ export class CollaborationManager {
     }
     if (!currentRoomId) return;
     const users = this.rooms.get(currentRoomId) || [];
-    console.log(users, 'users');
     for (const user of users) {
       if (excludeUserId && user.email !== excludeUserId) {
-        console.log('sending message to user', user.email);
         user.socket.send(message);
       }
     }
@@ -127,7 +124,6 @@ export class CollaborationManager {
         if (this.rooms.has(roomId)) {
           const room = this.rooms.get(roomId) || [];
       
-          console.log(room.length, "before length of room", room);
       
           const existingUserIndex = room.findIndex((u) => u.email === user.email);
       
@@ -139,7 +135,6 @@ export class CollaborationManager {
       
           this.rooms.set(roomId, room);
       
-          console.log(this.rooms.get(roomId)?.length, "length of room");
       
           user.socket.send(
             JSON.stringify({ type: EventTypes.JOINED_ROOM, roomId })
@@ -181,7 +176,6 @@ export class CollaborationManager {
         );
       } else if (message.type === EventTypes.SEND_ENCRYPTED_DATA) {
         const { roomId, encryptedData } = message.payload;
-        console.log(encryptedData,'encryptedData on server');
         this.broadcastToRoom(
           JSON.stringify({
             type: EventTypes.RECEIVE_ENCRYPTED_DATA,

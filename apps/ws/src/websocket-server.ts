@@ -65,7 +65,6 @@ wss.on("connection", function connection(ws: WebSocket, req) {
   );
   collobrationManager.addUser(user);
   ws.on("close", (event) => {
-    console.log(event, "event");
     console.log("Client disconnected");
     collobrationManager.broadcastToRoom(
       JSON.stringify({ type: "USER_LEFT", payload: { userId: user.email } }),

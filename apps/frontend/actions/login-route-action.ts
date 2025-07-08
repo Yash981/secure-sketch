@@ -14,7 +14,6 @@ export const LoginRouteAction = async (data: UserAuthFormSchema) => {
       throw new Error(response.statusText);
     }
     const setCookieHeader = response.headers["set-cookie"];
-    console.log(setCookieHeader,'setcookieheader')
     if (setCookieHeader) {
       (await cookies()).set({
         name: "token",

@@ -33,13 +33,11 @@ export function CollaborationDialog() {
         try {
             setLoading(true)
             const url = await uploadEncryptedDataToServer(canvasData)
-            console.log(url,'uploaded data and url')
             if(url){
                 setCurrentUrl(url)
                 setStartSession(true)
             }
             connect()
-            console.log(ws.current,'ws cuurenttt')
             if (ws.current) {
                 ws.current.onopen = () => {
                     console.log("WebSocket connected, sending CREATE_ROOM event.");

@@ -55,7 +55,6 @@ export const UserSignIn = async (req: Request, res: Response) => {
       parsedSignInData.data.password,
       existingUser.password
     );
-    console.log(verifyPassword, "existingUser");
     if (!verifyPassword) {
       res
         .status(400)

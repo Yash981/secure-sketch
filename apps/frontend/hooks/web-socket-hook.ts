@@ -42,7 +42,7 @@ export function useWebsocket(token: string | null) {
   }, []);
 
   const sendMessage = useCallback((data: string) => {
-    console.log('is it hitting',ws.current?.readyState,'data',data,ws.current,isConnected)
+    console.log('data',data,ws.current,isConnected)
       if (ws.current && ws.current.readyState === WebSocket.OPEN) {
         ws.current.send(data);
       } else {
